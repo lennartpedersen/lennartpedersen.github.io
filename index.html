@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <title>D3 Page Template</title>
+      <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="stylesheet.css">
+  </head>
+  <body>
+      <h1>San Francisco</h1>
+    <script>
+        var margin = {top: 20, right: 20, bottom: 30, left: 50}
+        var w = 1200 - margin.left - margin.right;
+        var h = 450 - margin.top - margin.bottom;
+
+                            
+
+        var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h);
+
+        
+
+        d3.json("san-francisco.geojson", function(json) {
+            createMap(json);
+        });
+
+        function createMap(json) {
+            // https://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object
+            var width  = w;
+            var height = h;
+
+            var center = d3.geoCentroid(json)
+            var scale  = 150;
+            var offset = [w/2, h/3];
+
+            var projection = d3.geoMercator()
+                                .center(center)
+                                .translate(offset)
+                                .scale(scale);
+
+            // create the path
+            var path = d3.geoPath().projection(projection);
+
+            // using the path determine the bounds of the current map and use 
+            // these to determine better values for the scale and translation
+            var bounds  = path.bounds(json);
+            var hscale  = scale*width  / (bounds[1][0] - bounds[0][0]);
+            var vscale  = scale*height / (bounds[1][1] - bounds[0][1]);
+            var scale   = (hscale < vscale) ? hscale : vscale;
+            var offset  = [width - (bounds[0][0] + bounds[1][0])/2,
+                            height - (bounds[0][1] + bounds[1][1])/2];
+
+            console.log("scale = " + scale);
+            console.log("center = " + center)
+
+
+            // new projection
+            projection = d3.geoMercator().center(center)
+            .scale(scale).translate(offset);
+            path = path.projection(projection);
+
+            //Bind data and create one path per GeoJSON 
+            svg.selectAll("path")
+                    .data(json.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", d3.geoPath().projection(projection))
+                    .on("mouseover", function(e) {
+                        d3.select(this)
+                            .style("fill", "grey");
+                    })
+                    .on("mouseout", function(e) {
+                        d3.select(this)
+                            .style("fill", "black")
+                    })
+                    .style("fill", "black");
+        }
+
+    </script>  
+  </body>
+</html>
