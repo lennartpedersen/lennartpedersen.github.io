@@ -5,6 +5,21 @@
       <title>D3 Page Template</title>
       <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
       <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+      <style>
+          div.tooltip {	
+            position: absolute;			
+            text-align: center;			
+            width: auto;					
+            height: auto;					
+            padding: 5px;				
+            font: 12px sans-serif;		
+            background: lightsteelblue;	
+            border: 0px;		
+            border-radius: 8px;			
+            pointer-events: none;			
+        }
+      </style>
   </head>
   <body>
       <h1>San Francisco</h1>
@@ -20,11 +35,15 @@
                     .attr("width", w)
                     .attr("height", h);
 
-        
+        var div = d3.select("body")
+                    .append("div")	
+                    .attr("class", "tooltip")				
+                    .style("opacity", 0);
 
         d3.json("san-francisco.geojson", function(json) {
             createMap(json);
         });
+        
 
         function createMap(json) {
             // https://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object
@@ -67,13 +86,27 @@
                     .enter()
                     .append("path")
                     .attr("d", d3.geoPath().projection(projection))
-                    .on("mouseover", function(e) {
+                    .on("mouseover", function(d) {
+
                         d3.select(this)
                             .style("fill", "grey");
+
+                        // Tooltip
+                        div.transition()		
+                            .duration(200)		
+                            .style("opacity", .9);
+
+                        div.html(d.properties.name)	
+                            .style("left", (d3.event.pageX) + "px")		
+                            .style("top", (d3.event.pageY - 28) + "px");
                     })
                     .on("mouseout", function(e) {
                         d3.select(this)
-                            .style("fill", "black")
+                            .style("fill", "black");
+
+                        div.transition()		
+                            .duration(500)		
+                            .style("opacity", 0);
                     })
                     .style("fill", "black");
         }
