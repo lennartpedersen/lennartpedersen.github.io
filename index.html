@@ -7,10 +7,19 @@
       <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 
       <style>
-          h1.title {
+        h1.title {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             font-size: 48px;
             text-align: center;
+        }
+
+        text.legendText {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+
+        text.hourBarTitle {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font-size: 20px;
         }
 
         div.tooltip {	
@@ -41,6 +50,16 @@
 
         rect.selection {
             z-index: 1001;
+        }
+
+        p.reset {
+            height: 20px;
+            width: 80px;
+            text-align: center;
+            border-style: solid;
+            border-width: 1px;
+            border-color: black;
+            cursor: pointer;
         }
       </style>
   </head>
@@ -101,13 +120,15 @@
                     var date = d["Incident Date"]
                     var year = +date.substring(date.length - 4, date.length)
                     
-                    if (year >= 2018) {
+                    if (year >= 2017) {
                         coords.push({
                             'lon': +(d.Longitudes.slice(0,-1)),
                             'lat': +d.Latitudes,
                             'desc': d.Desc,
                             'hour': +d.Hour - 1,
-                            'date': d["Incident Date"]
+                            'date': d["Incident Date"],
+                            'district': d["Neighborhood  District"],
+                            'index': d.Index
                         })
                         count++;
                     }
@@ -212,7 +233,8 @@
                             .style("opacity", 0);
                     })
                     .on("click", function(d) {
-                        console.log("Clicked " + d.properties.name)
+                        let districtName = d.properties.name;
+                        console.log("Clicked " + districtName)
                         
                         projection = d3.geoMercator()
                                         .center(d3.geoCentroid(d))
@@ -221,11 +243,35 @@
 
                         path = path.projection(projection);
 
-                        d3.selectAll("path").transition().duration(500).attr("d", path);
+                        // Zoom into map area
+                        d3.selectAll("path")
+                            .transition()
+                            .duration(500)
+                            .attr("d", path);
 
+                        // Move circles correspondly
                         updateCirclePositions(zoomMultiplier);
 
-                        d3.select("p.reset").transition().duration(500).style("opacity",1)
+                        // Show reset button
+                        d3.select("p.reset")
+                            .transition()
+                            .duration(500)
+                            .style("opacity",1)
+
+                        // Update title label
+                        d3.select("text.hourBarTitle")
+                            .text(districtName);
+
+                        // Update hour chart with fires from this district
+                        var districtData = [];
+                        circleData = d3.selectAll("circle").data();
+                        circleData.forEach(d => {
+                            if (d.district == districtName) {
+                                districtData.push(d)
+                            }
+                        })
+                        console.log(districtData)
+                        updateBarChartValues(districtData);
                     })
                     .style("z-index", 1000)
                     .style("stroke-width", "1px")
@@ -244,7 +290,17 @@
             d3.selectAll("path").transition().duration(500).attr("d", path);
 
             updateCirclePositions(1);
+
+            // Update title
+            d3.select("text.hourBarTitle")
+                .text("All districts");
+
+            // Update hourChart with all data
+            circleData = d3.selectAll("circle").data();
+            updateBarChartValues(circleData);
         }
+
+        var circleRadius = 2;
 
         function plotIncidents(coords) {
             circles = svg.append("g")
@@ -259,7 +315,7 @@
                         .attr("cy", function(d) {
                             return projection([d.lon, d.lat])[1];
                         })
-                        .attr("r", 1)
+                        .attr("r", circleRadius)
                         .attr("fill", "orange")
                         .attr("class", "non_brushed_circle")
                         .on("mouseover", function(d) {
@@ -268,7 +324,7 @@
                                 .duration(200)		
                                 .style("opacity", .9);
 
-                            div.html("Description: " + d.desc + "</br>" )	
+                            div.html("Description: " + d.desc + "</br>" + "Index: " + d.index + "</br>" + "District: " + d.district + "</br>" + "Location: " + d.lon + "," + d.lat)	
                                 .style("left", (d3.event.pageX) + "px")		
                                 .style("top", (d3.event.pageY - 28) + "px");
                         })
@@ -288,10 +344,11 @@
                     .attr("cy", function(d) {
                         return projection([d.lon, d.lat])[1];
                     })
-                    .attr("r", radius);
+                    .attr("r", circleRadius*radius);
         }
     
         var yScaleBar, xScaleBar;
+        const yPaddingForTitle = 30; // To make room for title
 
         function createFireByHourBarChart(brushedData) {
             var tempHourData = [];
@@ -326,30 +383,37 @@
             //Create X axis
             svgHourBar.append("g")
                 .attr("class", "axis-x")
-                .attr("transform", "translate(" + margin.left + "," + (hBar+margin.top) + ")")
+                .attr("transform", "translate(" + margin.left + "," + (hBar+margin.top+yPaddingForTitle) + ")")
                 .call(d3.axisBottom(xScaleBar));
             
             //Create Y axis
             svgHourBar.append("g")
                 .attr("class", "axis-y")
-                .attr("transform", "translate(" + margin.left + "," + (margin.top) + ")")
+                .attr("transform", "translate(" + margin.left + "," + (margin.top+yPaddingForTitle) + ")")
                 .call(d3.axisLeft(yScaleBar));
+
+            // Title label
+            svgHourBar.append("text")
+                        .attr("class", "hourBarTitle")
+                        .attr("x", 0 + wBar/2 + 20)
+                        .attr("y", 10)
+                        .attr("dy", "1em")
+                        .text("All districts");
 
             // X-Label
             svgHourBar.append("text")
                     .attr("class", "legendText")
                     .attr("transform",
-                            "translate(" + ((wBar/2)+margin.left) + "," + 
-                                        (hBar+35+margin.top) + ")")
-                    .text("Hour");
+                            "translate(" + ((wBar/2)+margin.left/2) + "," + 
+                                        (hBar+35+margin.top+yPaddingForTitle) + ")")
+                    .text("Hour of day");
 
-                
             // Y-Label
             svgHourBar.append("text")
                 .attr("class", "legendText")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 0)
-                .attr("x", 0 - (hBar / 2) - 70)
+                .attr("x", 0 - (hBar / 2) - 70 - yPaddingForTitle)
                 .attr("dy", "1em")
                 .text("# of fire incidents"); 
 
@@ -365,7 +429,7 @@
                         return xScaleBar(+d.key);
                     })
                     .attr("y", function(d) {                        
-                        return yScaleBar(d.values.length);
+                        return yScaleBar(d.values.length) + yPaddingForTitle;
                     })
                     .attr("width", xScaleBar.bandwidth()-1)
                     .attr("height", function(d){
@@ -419,7 +483,7 @@
             for(var i = 0; i < newValues.length; i++) {
                 tempHourData.push(newValues[i].hour);
             }
-            // console.log(newValues)
+             console.log(newValues)
 
             var filteredData = d3.nest()
                                 .key(function(d) {
@@ -475,13 +539,13 @@
                         return xScaleBar(+d.key);
                     })
                     .attr("y",function(d) {                    
-                        return yScaleBar(d.values.length);
+                        return yScaleBar(d.values.length) + yPaddingForTitle;
                     })
                     .attr("width",xScaleBar.bandwidth()-1)
                     .attr("height",function(d){
                         return hBar-yScaleBar(d.values.length);
                     })
-                    .attr("fill","grey");
+                    .attr("fill","black");
         }
 
     </script>  
