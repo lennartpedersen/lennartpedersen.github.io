@@ -17,7 +17,7 @@
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         }
 
-        text.hourBarTitle {
+        text.hourBarTitle, text.violationBarTitle {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             font-size: 20px;
         }
@@ -75,6 +75,7 @@
         var hBar = 200 - margin.top - margin.bottom;
                             
         var hoursLabels = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+        var violationTypes = [];
 
         // Reset button
         d3.select("div.container")
@@ -289,6 +290,9 @@
                         d3.select("text.hourBarTitle")
                             .text(districtName);
 
+                        d3.select("text.violationBarTitle")
+                            .text(districtName);
+
                         // Update hour chart with fires from this district
                         var districtData = [];
                         circleData = d3.selectAll("circle").data();
@@ -299,6 +303,7 @@
                         })
                         console.log(districtData)
                         updateHourBarChartValues(districtData);
+                        updateViolationTypeBarChartValues(districtData);
                     })
                     .style("z-index", 1000)
                     .style("stroke-width", "1px")
@@ -321,10 +326,14 @@
             // Update title
             d3.select("text.hourBarTitle")
                 .text("All districts");
+            
+            d3.select("text.violationBarTitle")
+                .text("All districts");
 
             // Update hourChart with all data
             circleData = d3.selectAll("circle").data();
             updateHourBarChartValues(circleData);
+            updateViolationTypeBarChartValues(circleData);
         }
 
         var circleRadius = 1.5;
@@ -519,6 +528,8 @@
         }
 
         function createViolationTypeBarChart(data) {
+            violationTypes = Object.keys(explainerTexts);
+
             var tempData = [];
             for(var i = 0; i < data.length; i++) {
                 if(data[i].type == 'violation') {
@@ -537,6 +548,8 @@
             }
 
             var sortData = filteredData.sort(descending);
+
+            console.log(sortData)
 
             yScaleViolationBar = d3.scaleLinear()
                     .domain([0, d3.max(sortData, function(d) {
@@ -559,13 +572,13 @@
             
             //Create Y axis
             svgHourBar.append("g")
-                .attr("class", "axis-y")
+                .attr("class", "axis-y-vio")
                 .attr("transform", "translate(" + (distanceFromHourChart+margin.left) + "," + (margin.top+yPaddingForTitle) + ")")
                 .call(d3.axisLeft(yScaleViolationBar));
 
             // Title label
             svgHourBar.append("text")
-                        .attr("class", "hourBarTitle")
+                        .attr("class", "violationBarTitle")
                         .attr("x", distanceFromHourChart + wBar/2 + 20)
                         .attr("y", 10)
                         .attr("dy", "1em")
@@ -650,14 +663,14 @@
                     // clearChart();
                     // createBarChart(d_brushed);
                     updateHourBarChartValues(d_brushed);
+                    updateViolationTypeBarChartValues(d_brushed);
                 } else {
                     // clearChart();
                     updateHourBarChartValues(d_brushed);
+                    updateViolationTypeBarChartValues(d_brushed);
                 }
             }
         }
-
-
 
         function isBrushed(brush_coords, cx, cy) {
             var x0 = brush_coords[0][0],
@@ -668,7 +681,79 @@
             return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
         }
 
+        function updateViolationTypeBarChartValues(newValues) {
+            var tempHourData = [];
+            for(var i = 0; i < newValues.length; i++) {
+                //Bar chart is only for incidents, not violations. 
+                if(newValues[i].type == 'violation') {
+                    tempHourData.push(newValues[i].violation);
+                }
+            }
 
+            var filteredData = d3.nest()
+                                .key(function(d) {
+                                    return d;
+                                })
+                                .entries(tempHourData);
+
+            var descending = function (a, b) {
+                return b.values.length - a.values.length
+            }
+
+            var sortData = filteredData.sort(descending);
+
+            var dataKeys = [];
+            sortData.forEach(d => {
+                console.log(d.key)
+                dataKeys.push(d.key)
+            })
+
+            var data = [];
+            violationTypes.forEach(d => {
+                if (dataKeys.includes(d)) {
+                    sortData.forEach(o => {
+                        if (o.key == d) {
+                            data.push(o);
+                        }
+                    })
+                } else {
+                    data.push({
+                        key: d,
+                        values: []
+                    })
+                }
+            })
+
+            sortData = data;
+
+            yScaleViolationBar = d3.scaleLinear()
+                                    .domain([0, d3.max(sortData, function(d) {
+                                        return d.values.length;
+                                    } )])
+                                    .rangeRound([hBar,0]);
+
+            svgHourBar.selectAll("g.axis-y-vio")
+                    .call(d3.axisLeft(yScaleViolationBar));
+
+            svgHourBar.selectAll("rect.vioData")
+                    .data(sortData)
+                    .transition()
+                    .duration(250)
+                    .ease(d3.easeLinear)
+                    .attr("class","vioData")
+                    .attr("transform", "translate(" + (distanceFromHourChart+margin.left) + ","+ margin.top +")")
+                    .attr("x",function(d,i) {
+                        return xScaleViolationBar(d.key);
+                    })
+                    .attr("y",function(d) {                    
+                        return yScaleViolationBar(d.values.length) + yPaddingForTitle;
+                    })
+                    .attr("width",xScaleViolationBar.bandwidth()-1)
+                    .attr("height",function(d){
+                        return hBar-yScaleViolationBar(d.values.length);
+                    })
+                    .attr("fill","black");
+        }
 
         function updateHourBarChartValues(newValues) {
             var tempHourData = [];
@@ -685,8 +770,6 @@
                                 })
                                 .entries(tempHourData);
 
-            // console.log(filteredData)
-
             var ascending = function (a, b) {
                 return a.key - b.key
             }
@@ -694,7 +777,6 @@
             var sortData = filteredData.sort(ascending);
 
             var data = [];
-
             for(var i = 0; i < hoursLabels.length; i++) {
                 data.push({
                     'hour': "" + (i),
@@ -722,7 +804,7 @@
             svgHourBar.selectAll("g.axis-y")
                     .call(d3.axisLeft(yScaleBar));
 
-            svgHourBar.selectAll("rect")
+            svgHourBar.selectAll("rect.selData")
                     .data(sortData)
                     .transition()
                     .duration(250)
