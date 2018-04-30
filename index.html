@@ -100,7 +100,7 @@
         var svgHourBar = d3.select("div.container")
                             .append("svg")
                             .attr("width", w)
-                            .attr("height", 700);
+                            .attr("height", hBar + 100);
 
         var div = d3.select("body")
                     .append("div")	
@@ -135,8 +135,9 @@
 
                 }
             });
+            
             count = 0;
-            d3.csv("Violations.csv", function(data) {
+            d3.csv("New_Violations.csv", function(data) {
                 data.forEach(d => {
                     if (count < 100000) {
                         var date = d["Violation Date"]
@@ -148,7 +149,8 @@
                                 'lat': +d.Latitudes,
                                 'desc': d["Violation Item Description"],
                                 'date': d["Violation Date"],
-                                'district': d["Neighborhood  District"],
+                                'district': d["Neighborhood District"],
+                                'violation': d["Violation Item"],
                                 'index': d.Index,
                                 'type': 'violation'
                             })
@@ -162,6 +164,7 @@
                     createMap(json);
                     plotIncidents(coords);
                     createFireByHourBarChart(coords);
+                    createViolationTypeBarChart(coords);
                 });
             })
 
@@ -295,7 +298,7 @@
                             }
                         })
                         console.log(districtData)
-                        updateBarChartValues(districtData);
+                        updateHourBarChartValues(districtData);
                     })
                     .style("z-index", 1000)
                     .style("stroke-width", "1px")
@@ -321,7 +324,7 @@
 
             // Update hourChart with all data
             circleData = d3.selectAll("circle").data();
-            updateBarChartValues(circleData);
+            updateHourBarChartValues(circleData);
         }
 
         var circleRadius = 1.5;
@@ -467,9 +470,164 @@
                     .attr("width", xScaleBar.bandwidth()-1)
                     .attr("height", function(d){
                         return hBar-yScaleBar(d.values.length);
+                    })
+                    .on("mouseover", function(d){
+                        d3.select(this)
+                            .attr("fill","grey");
+
+                        // Tooltip
+                        div.transition()		
+                            .duration(200)		
+                            .style("opacity", .9);
+
+                        div.html(d.values.length)	
+                            .style("left", (d3.event.pageX) + "px")		
+                            .style("top", (d3.event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function(d) {
+                        d3.select(this)
+                            .attr("fill", "black");
+
+                        div.transition()		
+                            .duration(500)		
+                            .style("opacity", 0);
                     });
         }
 
+        var yScaleViolationBar, xScaleViolationBar;
+        var distanceFromHourChart = 550;
+
+        var explainerTexts = {
+            'REC': "Reviews and certification of records such as emergency plans,</br> test and maintenance documentation, fire drills, etc.",
+            'SPR': "Obstruction of sprinklers and failure of maintenance, service,</br> certifications and replacement/installation of parts.",
+            'ALR': "Failure of alarm system maintenance",
+            'EXT': "Extinguisher requiring service, maintenance or not present.",
+            'DOR': "Violation regarding blocking doors, latches, chutes and self-closers.",
+            'EXI': "Blocked exits, fire escapes.",
+            'STO': "Storage - misplaced combustibles, gas and eletric meters, ceiling clearance.",
+            'ELE': "Electrical violations - extension cords, hazards, workspace clearance, etc.",
+            'ILL': "Illumination - repair of lighting, missing exit signs.",
+            'SIG': "Maintenance/Missing signs - address numbers, evacuation plans.",
+            'PER': "Missing fire permit.",
+            'SFC': "Breach of San Fransisco Fire Code.",
+            'PEN': "Violations regard walls, ceilings, chutes and fire ratings.",
+            'COM': "Fire command center features",
+            'KEY': "Keys provided by fire marshall. Removed lock boxes.",
+            'HAZ': "Hazards - misplaced gas cylinders and flammable liquids.</br> Missing identification signs.",
+            'STD': "Standpipes - obstructions, maintenance, missing parts.",
+            '999': "Other violations",
+        }
+
+        function createViolationTypeBarChart(data) {
+            var tempData = [];
+            for(var i = 0; i < data.length; i++) {
+                if(data[i].type == 'violation') {
+                    tempData.push(data[i].violation);
+                }
+            }
+
+            var filteredData = d3.nest()
+                                .key(function(d) {
+                                    return d;
+                                })
+                                .entries(tempData);
+
+            var descending = function (a, b) {
+                return b.values.length - a.values.length
+            }
+
+            var sortData = filteredData.sort(descending);
+
+            yScaleViolationBar = d3.scaleLinear()
+                    .domain([0, d3.max(sortData, function(d) {
+                        return d.values.length;
+                    } )])
+                    .rangeRound([hBar,0]);
+
+            xScaleViolationBar = d3.scaleBand()
+                        .rangeRound([0,wBar])
+                        .padding(0,1)
+                        .domain(sortData.map(function(d,i) {
+                            return d.key;
+                        }));
+            
+            //Create X axis
+            svgHourBar.append("g")
+                .attr("class", "axis-x")
+                .attr("transform", "translate(" + (distanceFromHourChart+margin.left) + "," + (hBar+margin.top+yPaddingForTitle) + ")")
+                .call(d3.axisBottom(xScaleViolationBar));
+            
+            //Create Y axis
+            svgHourBar.append("g")
+                .attr("class", "axis-y")
+                .attr("transform", "translate(" + (distanceFromHourChart+margin.left) + "," + (margin.top+yPaddingForTitle) + ")")
+                .call(d3.axisLeft(yScaleViolationBar));
+
+            // Title label
+            svgHourBar.append("text")
+                        .attr("class", "hourBarTitle")
+                        .attr("x", distanceFromHourChart + wBar/2 + 20)
+                        .attr("y", 10)
+                        .attr("dy", "1em")
+                        .text("All districts");
+
+            // X-Label
+            svgHourBar.append("text")
+                    .attr("class", "legendText")
+                    .attr("transform",
+                            "translate(" + (distanceFromHourChart+(wBar/2)+margin.left/2 - 10) + "," + 
+                                        (hBar+35+margin.top+yPaddingForTitle) + ")")
+                    .text("Type of violation");
+
+            // Y-Label
+            svgHourBar.append("text")
+                .attr("class", "legendText")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 + distanceFromHourChart)
+                .attr("x", 0 - (hBar / 2) - 70 - yPaddingForTitle) 
+                .attr("dy", "1em")
+                .text("# of violations"); 
+
+
+            bars = svgHourBar.append("g")
+                    .selectAll("rect1")
+                    .data(sortData)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "vioData")
+                    .attr("transform", "translate(" + (distanceFromHourChart+margin.left) + ","+ margin.top +")")
+                    .attr("x", function(d,i) {
+                        return xScaleViolationBar(d.key);
+                    })
+                    .attr("y", function(d) {                        
+                        return yScaleViolationBar(d.values.length) + yPaddingForTitle;
+                    })
+                    .attr("width", xScaleViolationBar.bandwidth()-1)
+                    .attr("height", function(d){
+                        return hBar-yScaleViolationBar(d.values.length);
+                    })
+                    .on("mouseover", function(d) {
+                        d3.select(this)
+                            .attr("fill", "grey");
+
+                        // Tooltip
+                        div.transition()		
+                            .duration(200)		
+                            .style("opacity", .9);
+
+                        div.html("<b>" + d.key + "</b></br>" + explainerTexts[d.key])	
+                            .style("left", (d3.event.pageX) + "px")		
+                            .style("top", (d3.event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function(d) {
+                        d3.select(this)
+                            .attr("fill", "black");
+
+                        div.transition()		
+                            .duration(500)		
+                            .style("opacity", 0);
+                    });
+        }
 
         function brushed() {
             if (d3.event.selection != null) {
@@ -491,10 +649,10 @@
                 if (d_brushed.length > 0) {
                     // clearChart();
                     // createBarChart(d_brushed);
-                    updateBarChartValues(d_brushed);
+                    updateHourBarChartValues(d_brushed);
                 } else {
                     // clearChart();
-                    updateBarChartValues(d_brushed);
+                    updateHourBarChartValues(d_brushed);
                 }
             }
         }
@@ -512,7 +670,7 @@
 
 
 
-        function updateBarChartValues(newValues) {
+        function updateHourBarChartValues(newValues) {
             var tempHourData = [];
             for(var i = 0; i < newValues.length; i++) {
                 //Bar chart is only for incidents, not violations. 
