@@ -68,8 +68,8 @@
       <div class="container"></div>
     <script>
         var margin = {top: 20, right: 20, bottom: 30, left: 50}
-        var w = 900 - margin.left - margin.right;
-        var h = 600 - margin.top - margin.bottom;
+        var w = 1700 - margin.left - margin.right;
+        var h = 1000 - margin.top - margin.bottom;
         var padding = 1;
         var wBar = 500 - margin.left - margin.right;
         var hBar = 200 - margin.top - margin.bottom;
@@ -188,8 +188,8 @@
                 .attr("height", h + 20)
 
             // https://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object
-            var width  = w;
-            var height = 500;
+            var width  = w-200;
+            var height = 900;
 
             var center = d3.geoCentroid(json)
             mapCenter = center;
@@ -324,7 +324,7 @@
             updateBarChartValues(circleData);
         }
 
-        var circleRadius = 2;
+        var circleRadius = 1.5;
 
         function plotIncidents(coords) {
             circles = svg.append("g")
