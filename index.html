@@ -384,7 +384,9 @@
         function createFireByHourBarChart(brushedData) {
             var tempHourData = [];
             for(var i = 0; i < brushedData.length; i++) {
-                tempHourData.push(brushedData[i].hour);
+                if(brushedData[i].type == 'incident') {
+                    tempHourData.push(brushedData[i].hour);
+                }
             }
             var filteredData = d3.nest()
                                 .key(function(d) {
@@ -468,92 +470,6 @@
                     });
         }
 
-        function createViolationByHourBarChart(brushedData) {
-            var tempHourData = [];
-            for(var i = 0; i < brushedData.length; i++) {
-                tempHourData.push(brushedData[i].hour);
-            }
-            var filteredData = d3.nest()
-                                .key(function(d) {
-                                    return d;
-                                })
-                                .entries(tempHourData);
-
-            var ascending = function (a, b) {
-                return a.key - b.key
-            }
-
-            var sortData = filteredData.sort(ascending);
-
-            yScaleBar = d3.scaleLinear()
-                    .domain([0, d3.max(sortData, function(d) {
-                        return d.values.length;
-                    } )])
-                    .rangeRound([hBar,0]);
-
-            xScaleBar = d3.scaleBand()
-                        .rangeRound([0,wBar])
-                        .padding(0,1)
-                        .domain(sortData.map(function(d,i) {
-                            return +d.key;
-                        }));
-            
-            //Create X axis
-            svgHourBar.append("g")
-                .attr("class", "axis-x")
-                .attr("transform", "translate(" + margin.left + "," + (hBar+margin.top+yPaddingForTitle+hBar+extraPadding) + ")")
-                .call(d3.axisBottom(xScaleBar));
-            
-            //Create Y axis
-            svgHourBar.append("g")
-                .attr("class", "axis-y")
-                .attr("transform", "translate(" + margin.left + "," + (margin.top+yPaddingForTitle+hBar+extraPadding) + ")")
-                .call(d3.axisLeft(yScaleBar));
-
-            // Title label
-            svgHourBar.append("text")
-                        .attr("class", "hourBarTitle")
-                        .attr("x", 0 + wBar/2 + 20)
-                        .attr("y", 10+hBar +extraPadding)
-                        .attr("dy", "1em")
-                        .text("All districts");
-
-            // X-Label
-            svgHourBar.append("text")
-                    .attr("class", "legendText")
-                    .attr("transform",
-                            "translate(" + ((wBar/2)+margin.left/2) + "," + 
-                                        (hBar+35+margin.top+yPaddingForTitle+hBar +extraPadding) + ")")
-                    .text("Hour of day");
-
-            // Y-Label
-            svgHourBar.append("text")
-                .attr("class", "legendText")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 0)
-                .attr("x", 0 - ((hBar*2+extraPadding) / 2) - 170 - (yPaddingForTitle*2))
-                .attr("dy", "1em")
-                .text("# of fire incidents"); 
-
-
-            bars = svgHourBar.append("g")
-                    .selectAll("rect1")
-                    .data(sortData)
-                    .enter()
-                    .append("rect")
-                    .attr("class", "selData")
-                    .attr("transform", "translate(" + margin.left + ","+ margin.top + hBar + extraPadding +")")
-                    .attr("x", function(d,i) {
-                        return xScaleBar(+d.key);
-                    })
-                    .attr("y", function(d) {                        
-                        return yScaleBar(d.values.length) + yPaddingForTitle;
-                    })
-                    .attr("width", xScaleBar.bandwidth()-1)
-                    .attr("height", function(d){
-                        return hBar-yScaleBar(d.values.length);
-                    });
-        }
 
         function brushed() {
             if (d3.event.selection != null) {
@@ -599,7 +515,10 @@
         function updateBarChartValues(newValues) {
             var tempHourData = [];
             for(var i = 0; i < newValues.length; i++) {
-                tempHourData.push(newValues[i].hour);
+                //Bar chart is only for incidents, not violations. 
+                if(newValues[i].type == 'incident') {
+                    tempHourData.push(newValues[i].hour);
+                }
             }
 
             var filteredData = d3.nest()
