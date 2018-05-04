@@ -61,6 +61,12 @@
             border-color: black;
             cursor: pointer;
         }
+
+        .line {
+            fill: none;
+            stroke: teal;
+            stroke-width: 0.5;
+        }
       </style>
   </head>
   <body>
@@ -102,10 +108,18 @@
                             .attr("width", w)
                             .attr("height", hBar + 100);
 
+        var svgLineChart = d3.select("div.container")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", hBar + 100);
+
         var div = d3.select("body")
                     .append("div")	
                     .attr("class", "tooltip")				
                     .style("opacity", 0);
+
+        // parse the date / time
+        var parseTime = d3.timeParse("%m/%d/%Y");
 
         var projection, path, mapCenter, mapScale, mapOffset, brush, circles;
         var zoomMultiplier = 1.8;
@@ -125,7 +139,7 @@
                             'lat': +d.Latitudes,
                             'desc': d.Desc,
                             'hour': +d.Hour - 1,
-                            'date': d["Incident Date"],
+                            'date': parseTime(d["Incident Date"]),
                             'district': d["Neighborhood  District"],
                             'index': d.Index,
                             'type': 'incident'
@@ -148,7 +162,7 @@
                                 'lon': +d.Longitudes,
                                 'lat': +d.Latitudes,
                                 'desc': d["Violation Item Description"],
-                                'date': d["Violation Date"],
+                                'date': parseTime(d["Violation Date"]),
                                 'district': d["Neighborhood District"],
                                 'violation': d["Violation Item"],
                                 'index': d.Index,
@@ -160,11 +174,13 @@
                 })
 
                 d3.json("san-francisco.geojson", function(json) {
+                    console.log(coords);
                     createBrush();
                     createMap(json);
                     plotIncidents(coords);
                     createFireByHourBarChart(coords);
                     createViolationTypeBarChart(coords);
+                    createLineChart(coords);
                 });
             })
 
@@ -627,6 +643,81 @@
                             .duration(500)		
                             .style("opacity", 0);
                     });
+        }
+
+
+        function createLineChart(data) {
+
+            var tempIncidents = [];
+            var tempViolations = [];
+            for(var i = 0; i < data.length; i++) {
+                if(data[i].type == 'violation') {
+                    tempViolations.push(data[i]);
+                } else {
+                    tempIncidents.push(data[i]);
+                }
+            }
+            
+            var filteredIncidents = d3.nest()
+                .key(function(d) {
+                    return d.date;
+                })
+                .entries(tempIncidents);
+
+            var filteredViolations = d3.nest()
+                .key(function(d) {
+                    return d.date;
+                })
+                .entries(tempViolations);
+
+            
+
+            var sortIncidents = filteredIncidents;
+            var sortViolations = filteredViolations;
+            console.log(typeof(sortIncidents[0].key))
+            console.log(typeof(sortIncidents[0].values.length))
+
+            // set the ranges
+            var x = d3.scaleTime().range([0, wBar]);
+            var y = d3.scaleLinear().range([hBar, 0]);
+
+            // define the line
+            var valueline = d3.line()
+                                .x(function(d) { return x(d.key); })
+                                .y(function(d) { 
+                                    return y(d.values.length); });
+
+
+            x.domain(d3.extent(sortIncidents, function(d) { 
+                return d.key; }));
+            y.domain([0, d3.max(sortIncidents, function(d) {
+                return d.values.length; })]);
+            
+
+
+            svgLineChart.append("path")
+                .data([sortIncidents])
+                .attr("class", "line")
+                .attr("d", valueline);
+
+            svgLineChart.append("path")
+                .data([sortViolations])
+                .attr("class", "line")
+                .attr("stroke", "red")
+                .attr("d", valueline);
+
+            // Add the X Axis
+            svgLineChart.append("g")
+                .attr("transform", "translate(0," + hBar + ")")
+                .call(d3.axisBottom(x));
+
+            // Add the Y Axis
+            svgLineChart.append("g")
+                .call(d3.axisLeft(y));
+
+
+
+
         }
 
         function brushed() {
