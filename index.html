@@ -63,10 +63,16 @@
             cursor: pointer;
         }
 
-        .line {
+        .lineDataIncidents {
             fill: none;
             stroke-width: 0.7;
         }
+
+        .lineDataViolations {
+            fill: none;
+            stroke-width: 0.7;
+        }
+
         p.brødtekst {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             opacity: 0;
@@ -432,6 +438,7 @@
                     updateHourBarChartValues(districtData);
                     updateViolationTypeBarChartValues(districtData);
                     updateFireTypeBarChartValues(districtData);
+                    updateLineChartValues(districtData)
 
                     // Move circles correspondly
                     updateCirclePositions(districtName,zoomMultiplier);
@@ -497,6 +504,7 @@
             updateHourBarChartValues(coords);
             updateViolationTypeBarChartValues(coords);
             updateFireTypeBarChartValues(coords);
+            updateLineChartValues(coords);
         }
 
         var blobDict = {
@@ -1274,6 +1282,17 @@
                     });
         }
 
+        var paddingLeft = 30;
+        var titlePadding = 50;
+        // set the ranges
+        var x = d3.scaleTime().range([0, w-300]);
+        var y = d3.scaleLinear().range([hBar, 0]);
+
+        // define the line
+        var valueline = d3.line()
+                            .x(function(d) { return x( d.key); })
+                            .y(function(d) { 
+                                return y(d.values.length); });
 
         function createLineChart(data) {
 
@@ -1326,22 +1345,7 @@
 
 
 
-            var testData1 = [
-                {key: new Date('01/21/2017'), values: [0,0,0]},
-                {key: new Date('01/20/2017'), values: [0,0,0,0,0,0,0,0]},
-                {key: new Date('02/23/2017'), values: [0,0,0,0,0]},
-                {key: new Date('01/24/2017'), values: [0,0,0,0,0,0,0,0,0,0,0]},
-            ];
-
-            // set the ranges
-            var x = d3.scaleTime().range([0, w-300]);
-            var y = d3.scaleLinear().range([hBar, 0]);
-
-            // define the line
-            var valueline = d3.line()
-                                .x(function(d) { return x( d.key); })
-                                .y(function(d) { 
-                                    return y(d.values.length); });
+            
 
 
             x.domain(d3.extent(sortViolations, function(d) { 
@@ -1349,37 +1353,37 @@
             y.domain([0, d3.max(sortViolations, function(d) {
                 return d.values.length; })]);
             
-            var paddingLeft = 30;
-            var titlePadding = 50;
 
 
             svgLineChart.append("path")
                 .data([sortIncidents])
-                .attr("class", "line")
+                .attr("class", "lineDataIncidents")
                 .attr("stroke", "teal")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("d", valueline);
 
             svgLineChart.append("path")
                 .data([sortViolations])
-                .attr("class", "line")
+                .attr("class", "lineDataViolations")
                 .attr("stroke", "red")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("d", valueline);
 
             // Add the X Axis
             svgLineChart.append("g")
+                .attr("class","x-axis-line")
                 .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (hBar+titlePadding) + ")")
                 .call(d3.axisBottom(x));
 
             // Add the Y Axis
             svgLineChart.append("g")
+                .attr("class", "y-axis-line")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + "," + titlePadding +")")
                 .call(d3.axisLeft(y));
 
             // Title label
             svgLineChart.append("text")
-                        .attr("class", "violationBarTitle")
+                        .attr("class", "LineChartTitle")
                         .attr("x", w/2)
                         .attr("y",  0)
                         .attr("dy", "1em")
@@ -1436,11 +1440,13 @@
                     updateHourBarChartValues(d_brushed);
                     updateViolationTypeBarChartValues(d_brushed);
                     updateFireTypeBarChartValues(d_brushed);
+                    updateLineChartValues(d_brushed);
                 } else {
                     // clearChart();
                     updateHourBarChartValues(d_brushed);
                     updateViolationTypeBarChartValues(d_brushed);
                     updateFireTypeBarChartValues(d_brushed);
+                    updateLineChartValues(d_brushed);
                 }
             }
         }
@@ -1667,6 +1673,89 @@
                         return hBar-yScaleBar(d.values.length);
                     })
                     .attr("fill","black");
+        }
+
+        function updateLineChartValues(data) {
+            var tempIncidents = [];
+            var tempViolations = [];
+            for(var i = 0; i < data.length; i++) {
+                if(data[i].type == 'violation') {
+                    tempViolations.push(data[i]);
+                } else {
+                    tempIncidents.push(data[i]);
+                }
+            }
+            
+            var filteredIncidents = d3.nest()
+                .key(function(d) {
+                    return convertToDates(d.date);
+                })
+                .entries(tempIncidents);
+
+            var filteredViolations = d3.nest()
+                .key(function(d) {
+                    return convertToDates(d.date);
+                })
+                .entries(tempViolations);
+
+            
+
+            var sortIncidents = filteredIncidents;
+            sortIncidents.forEach(function(d) {
+                d.key = new Date(d.key);
+            })
+
+             sortIncidents.sort(function(a,b){
+                // Turn your strings into dates, and then subtract them
+                // to get a value that is either negative, positive, or zero.
+                return new Date(b.key) - new Date(a.key);
+            });
+
+            var sortViolations = filteredViolations;
+            sortViolations.forEach(function(d) {
+                d.key = new Date(d.key);
+            })
+            
+ 
+            sortViolations.sort(function(a,b){
+                // Turn your strings into dates, and then subtract them
+                // to get a value that is either negative, positive, or zero.
+                return new Date(b.key) - new Date(a.key);
+            });
+
+            x.domain(d3.extent(sortViolations, function(d) { 
+                return d.key; }));
+            y.domain([0, d3.max(sortViolations, function(d) {
+                return d.values.length; })]);
+
+
+            svgLineChart.selectAll("g.axis-y-line")
+                    .call(d3.axisLeft(y));
+
+            svgLineChart.selectAll("g.axis-x-line")
+                    .call(d3.axisBottom(x));
+
+            svgLineChart.selectAll("path.lineDataIncidents")
+                    .data([sortIncidents])
+                    .transition()
+                    .duration(250)
+                    .ease(d3.easeLinear)
+                    .attr("class","lineDataIncidents")
+                    .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
+                    .attr("d", valueline);
+
+            svgLineChart.selectAll("path.lineDataViolations")
+                    .data([sortViolations])
+                    .transition()
+                    .duration(250)
+                    .ease(d3.easeLinear)
+                    .attr("class","lineDataViolations")
+                    .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
+                    .attr("d", valueline);
+
+        
+
+
         }
 
     </script>  
