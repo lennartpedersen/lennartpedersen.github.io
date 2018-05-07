@@ -1585,18 +1585,18 @@
 
             // Title label
             svgLineChart.append("text")
-                        .attr("class", "LineChartTitle")
-                        .attr("x", w/2)
-                        .attr("y",  0)
-                        .attr("dy", "1em")
-                        .text("Violations and Incidents over time");
+                .attr("class", "LineChartTitle")
+                .attr("x", w/2)
+                .attr("y",  0)
+                .attr("dy", "1em")
+                .text("Violations and Incidents over time");
 
             // X-Label
             svgLineChart.append("text")
-                    .attr("class", "legendText")
-                    .attr("x", w/2)
-                    .attr("y",  hBar + 50+titlePadding)
-                    .text("Date");
+                .attr("class", "legendText")
+                .attr("x", w/2)
+                .attr("y",  hBar + 50+titlePadding)
+                .text("Date");
 
             // Y-Label
             svgLineChart.append("text")
@@ -1606,7 +1606,38 @@
                 .attr("x", 0 - (hBar / 2) -130) 
                 .attr("dy", "1em")
                 .text("# of violations and incidents"); 
-        }
+
+            // Legend
+            var names = ["Incidents","Violations" ];
+            var padding = 20;
+
+            svgLineChart.append("text")
+                .attr("x", margin.left+80)
+                .attr("y", 10+titlePadding)
+                .text(function(d) {
+                    return names[0];
+                });
+
+            svgLineChart.append("text")
+                .attr("x", margin.left+80)
+                .attr("y", 30+titlePadding)
+                .text(function(d) {
+                    return names[1];
+                });
+
+            svgLineChart.append("circle")
+                .attr("cx", margin.left+70)
+                .attr("cy", 5+titlePadding)
+                .attr("r", 5)
+                .attr("fill", "red");
+            
+            svgLineChart.append("circle")
+                .attr("cx", margin.left+70)
+                .attr("cy", 25+titlePadding)
+                .attr("r", 5)
+                .attr("fill", "teal");
+
+            }
 
         function brushed() {
             if (d3.event.selection != null) {
