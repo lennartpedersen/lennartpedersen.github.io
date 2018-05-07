@@ -81,6 +81,7 @@
       </style>
   </head>
   <body>
+      <a href="explainer.html">Explainer page</a>
       <h1 class="title-loader">
             <p>Loading</p>
             <i class="fa fa-refresh fa-spin" style="font-size:96px"></i>
@@ -204,7 +205,6 @@
 
                 }
             });
-            console.log(coords)
             
             count = 0;
             d3.csv("New_Violations.csv", function(data) {
@@ -510,39 +510,242 @@
         var blobDict = {
             'Seacliff': {
                 'radius': 10,
-                'x': 225,
-                'y': 245,
-                'x1': 250,
-                'y1': 245,
+                'x': -30,
+                'y': 0,
+                'x1': -20,
+                'y1': 0,
             },
             'Outer Richmond': {
                 'radius': 10,
-                'x': 245,
-                'y': 285,
-                'x1': 280,
-                'y1': 285,
+                'x': -15,
+                'y': 7,
+                'x1': 0,
+                'y1': 15,
             },
             'Golden Gate Park': {
                 'radius': 10,
-                'x': 285,
-                'y': 322,
-                'x1': 320,
-                'y1': 321,
+                'x': 0,
+                'y': 5,
+                'x1': 5,
+                'y1': -4,
             },
             'Sunset/Parkside': {
-                'radius': 15,
-                'x': 245,
-                'y': 385,
-                'x1': 280,
-                'y1': 385,
+                'radius': 10,
+                'x': -10,
+                'y': -20,
+                'x1': 50,
+                'y1': -25,
             },
             'Lakeshore': {
-                'radius': 15,
-                'x': 265,
-                'y': 555,
-                'x1': 300,
-                'y1': 555,
+                'radius': 10,
+                'x': -40,
+                'y': 0,
+                'x1': -15,
+                'y1': -8,
             },
+            'Presidio': {
+                'radius': 10,
+                'x': -35,
+                'y': 20,
+                'x1': -25,
+                'y1': 20,
+            },
+            'Inner Richmond': {
+                'radius': 10,
+                'x': -42,
+                'y': 0,
+                'x1': -20,
+                'y1': 3,
+            },
+            'Inner Sunset': {
+                'radius': 10,
+                'x': -12,
+                'y': 10,
+                'x1': 10,
+                'y1': 21,
+            },
+            'West of Twin Peaks': {
+                'radius': 10,
+                'x': -12,
+                'y': -10,
+                'x1': -20,
+                'y1': -15,
+            },
+            'Ocean View': {
+                'radius': 10,
+                'x': -15,
+                'y': 0,
+                'x1': -10,
+                'y1': 27,
+            },
+            'Presidio Heights': {
+                'radius': 9,
+                'x': -16,
+                'y': 0,
+                'x1': 10,
+                'y1': -7,
+            },
+            'Haight Ashbury': {
+                'radius': 10,
+                'x': -18,
+                'y': -2,
+                'x1': 13,
+                'y1': -10,
+            },
+            'Twin Peaks': {
+                'radius': 10,
+                'x': -10,
+                'y': -5,
+                'x1': 12,
+                'y1': -10,
+            },
+            'Outer Mission': {
+                'radius': 10,
+                'x': -5,
+                'y': -20,
+                'x1': 10,
+                'y1': -10,
+            },
+            'Marina': {
+                'radius': 10,
+                'x': -10,
+                'y': 0,
+                'x1': 8,
+                'y1': -8,
+            },
+            'Pacific Heights': {
+                'radius': 10,
+                'x': -21,
+                'y': -10,
+                'x1': -2,
+                'y1': -4,
+            },
+            'Western Addition': {
+                'radius': 10,
+                'x': -27,
+                'y': -10,
+                'x1': -5,
+                'y1': -5,
+            },
+            'Castro/Upper Market': {
+                'radius': 10,
+                'x': -25,
+                'y': 10,
+                'x1': 0,
+                'y1': 5,
+            },
+            'Noe Valley': {
+                'radius': 10,
+                'x': -12,
+                'y': 0,
+                'x1': -5,
+                'y1': 0,
+            },
+            'Glen Park': {
+                'radius': 8,
+                'x': 12,
+                'y': 10,
+                'x1': -12,
+                'y1': 10,
+            },
+            'Russian Hill': {
+                'radius': 10,
+                'x': 0,
+                'y': 0,
+                'x1': 22,
+                'y1': 1,
+            },
+            'North Beach': {
+                'radius': 10,
+                'x': 0,
+                'y': -2,
+                'x1': 10,
+                'y1': 5,
+            },
+            'Mission': {
+                'radius': 10,
+                'x': -5,
+                'y': 12,
+                'x1': 25,
+                'y1': 10,
+            },
+            'Bernal Heights': {
+                'radius': 10,
+                'x': -20,
+                'y': 5,
+                'x1': 15,
+                'y1': 22,
+            },
+            'Excelsior': {
+                'radius': 10,
+                'x': -18,
+                'y': -7,
+                'x1': 0,
+                'y1': -15,
+            },
+            'Visitacion Valley': {
+                'radius': 10,
+                'x': -10,
+                'y': 0,
+                'x1': 0,
+                'y1': -17,
+            },
+            'Nob Hill': {
+                'radius': 10,
+                'x': -12,
+                'y': -10,
+                'x1': 3,
+                'y1': -12,
+            },
+            'Tenderloin': {
+                'radius': 10,
+                'x': -12,
+                'y': 5,
+                'x1': 8,
+                'y1': -5,
+            },
+            'South of Market': {
+                'radius': 10,
+                'x': -10,
+                'y': 10,
+                'x1': 22,
+                'y1': 17,
+            },
+            'Potrero Hill': {
+                'radius': 10,
+                'x': 0,
+                'y': 0,
+                'x1': 22,
+                'y1': 6,
+            },
+            'Bayview Hunters Point': {
+                'radius': 10,
+                'x': -20,
+                'y': 0,
+                'x1': 15,
+                'y1': 0,
+            },
+            'Financial District/South Beach': {
+                'radius': 10,
+                'x': -5,
+                'y': 5,
+                'x1': 20,
+                'y1': -5,
+            },
+            'Chinatown': {
+                'radius': 6,
+                'x': -2,
+                'y': 2,
+                'x1': -3,
+                'y1': 12,
+            },
+            'Treasure Island': {
+                'radius': 10,
+                'x': -4,
+                'y': -20,
+                'x1': 5,
+                'y1': 8,
+            }
         };
 
         function plotIncidents(coords) {
@@ -601,10 +804,10 @@
                 if (blob == undefined) {
                     blob = {
                         'radius': 10,
-                        'x': 100,
-                        'y': 100,
-                        'x1': 150,
-                        'y1': 100,
+                        'x': 0,
+                        'y': 0,
+                        'x1': 0,
+                        'y1': 0,
                     }
                 }
 
@@ -630,12 +833,12 @@
 
                 svg.append("circle")
                     .attr("class", "blob")
-                    .attr("cx", x)
-                    .attr("cy", y)
+                    .attr("cx", x + blob.x)
+                    .attr("cy", y + blob.y)
                     // .attr("cx", blob.x)
                     // .attr("cy", blob.y)
                     // .attr("r", Math.sqrt(data.length)/5)
-                    .attr("r", 10)
+                    .attr("r", blob.radius)
                     .style("opacity", 1)
                     .attr("fill", function() { 
                         return incColorScale(incColorFraction)
@@ -671,9 +874,9 @@
                     .attr("class", "blob")
                     // .attr("cx", blob.x1)
                     // .attr("cy", blob.y1)
-                    .attr("cx", x1)
-                    .attr("cy", y1)
-                    .attr("r", 10)
+                    .attr("cx", x1 + blob.x1)
+                    .attr("cy", y1 + blob.y1)
+                    .attr("r", blob.radius)
                     .attr("fill", vioColorScale(vioColorFraction))
                     .style("opacity", 1)
                     .on("mouseover", function(d) {
@@ -1189,7 +1392,6 @@
 
             var sortData = filteredData.sort(descending);
 
-            console.log(sortData)
 
             yScaleFireTypeBar = d3.scaleLinear()
                     .domain([0, d3.max(sortData, function(d) {
