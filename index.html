@@ -7,6 +7,7 @@
       <link type="text/css" href="stylesheet.css" rel="stylesheet">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
       <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+      <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 
       <style>
         h1.title, h1.title-loader {
@@ -15,12 +16,11 @@
             text-align: center;
         }
 
-        text.legendText {
+        text {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         }
 
         text.hourBarTitle, text.violationBarTitle {
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             font-size: 20px;
         }
 
@@ -232,8 +232,7 @@
                 })
 
                 d3.json("san-francisco.geojson", function(json) {
-                    console.log(coords);
-                    createBrush();
+                    //createBrush();
                     createMap(json);
                     plotIncidents(coords);
                     createFireByHourBarChart(coords);
@@ -291,12 +290,6 @@
         }
 
         function createMap(json) {
-            svg.append("defs")
-                .append("clipPath")
-                .attr("id", "clip")
-                .append("rect")
-                .attr("width", w)
-                .attr("height", h + 20)
 
             // https://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object
             var width  = w-200;
@@ -340,99 +333,102 @@
 
             //Bind data and create one path per GeoJSON 
             svg.selectAll("path")
-                    .data(json.features)
-                    .enter()
-                    .append("path")
-                    .attr("class", "map")
-                    .attr("clip-path", "url(#clip)")
-                    .attr("d", path)
-                    .on("mouseover", function(d) {
-                        d3.select(this)
-                            .style("fill", "lightgrey");
+                .data(json.features)
+                .enter()
+                .append("path")
+                .attr("class", "map")
+                .attr("clip-path", "url(#clip)")
+                .attr("d", path)
+                .on("mouseover", function(d) {
+                    d3.select(this)
+                        .style("fill", "lightgrey");
 
-                        // Tooltip
-                        div.transition()		
-                            .duration(200)		
-                            .style("opacity", .9);
+                    // Tooltip
+                    div.transition()		
+                        .duration(200)		
+                        .style("opacity", .9);
 
-                        div.html(d.properties.name)	
-                            .style("left", (d3.event.pageX) + "px")		
-                            .style("top", (d3.event.pageY - 28) + "px");
-                    })
-                    .on("mouseout", function(e) {
-                        d3.select(this)
-                            .style("fill", "transparent");
+                    div.html(d.properties.name)	
+                        .style("left", (d3.event.pageX) + "px")		
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(e) {
+                    d3.select(this)
+                        .style("fill", "transparent");
 
-                        div.transition()		
-                            .duration(500)		
-                            .style("opacity", 0);
-                    })
-                    .on("click", function(d) {
-                        let districtName = d.properties.name;
-                        console.log("Clicked " + districtName)
-                        
-                        projection = d3.geoMercator()
-                                        .center(d3.geoCentroid(d))
-                                        .scale(zoomScale)
-                                        .translate(mapOffset);
+                    div.transition()		
+                        .duration(500)		
+                        .style("opacity", 0);
+                })
+                .on("click", function(d) {
+                    let districtName = d.properties.name;
+                    console.log("Clicked " + districtName)
+                    
+                    projection = d3.geoMercator()
+                                    .center(d3.geoCentroid(d))
+                                    .scale(zoomScale)
+                                    .translate(mapOffset);
 
-                        path = path.projection(projection);
+                    path = path.projection(projection);
 
-                        // Remove brush
-                        d3.select("rect.overlay")
-                            .attr("height", 0);
+                    // Remove brush
+                    d3.select("rect.overlay")
+                        .attr("height", 0);
 
-                        d3.select("rect.selection")
-                            .attr("height", 1)
-                            .attr("width", 1)
-                            .attr("opacity",0);
+                    d3.select("rect.selection")
+                        .attr("height", 1)
+                        .attr("width", 1)
+                        .attr("opacity",0);
 
-                        // Zoom into map area
-                        d3.selectAll("path")
-                            .transition()
-                            .duration(500)
-                            .attr("d", path);
+                    // Zoom into map area
+                    d3.selectAll("path")
+                        .transition()
+                        .duration(500)
+                        .attr("d", path);
 
 
-                        // Show reset button
-                        d3.select("p.reset")
-                            .transition()
-                            .duration(500)
-                            .style("opacity",1);
+                    // Show reset button
+                    d3.select("p.reset")
+                        .transition()
+                        .duration(500)
+                        .style("opacity",1);
 
-                        // Update title label
-                        d3.select("text.hourBarTitle")
-                            .text(districtName);
+                    // Update title label
+                    d3.select("text.hourBarTitle")
+                        .text(districtName);
 
-                        d3.select("text.violationBarTitle")
-                            .text(districtName);
+                    d3.select("text.violationBarTitle")
+                        .text(districtName);
 
-                        d3.selectAll("circle.point").remove();
+                    d3.selectAll("circle.point").remove();
 
-                        // Update hour chart with fires from this district
-                        var districtData = districtDict[districtName];
-                        setTimeout(function() {
-                            plotCirclesInDistrict(districtData, districtName);
-                        }, 500)
-                        
+                    // Update hour chart with fires from this district
+                    var districtData = districtDict[districtName];
+                    setTimeout(function() {
+                        plotCirclesInDistrict(districtData, districtName);
+                    }, 500)
+                    
 
-                        updateHourBarChartValues(districtData);
-                        updateViolationTypeBarChartValues(districtData);
-                        updateFireTypeBarChartValues(districtData);
+                    updateHourBarChartValues(districtData);
+                    updateViolationTypeBarChartValues(districtData);
+                    updateFireTypeBarChartValues(districtData);
 
-                        // Move circles correspondly
-                        updateCirclePositions(districtName,zoomMultiplier);
-                        d3.selectAll("circle.blob").style("opacity", 0);
+                    // Move circles correspondly
+                    updateCirclePositions(districtName,zoomMultiplier);
+                    d3.selectAll("circle.blob").style("opacity", 0);
 
-                    })
-                    .style("z-index", 1000)
-                    .style("stroke-width", "1px")
-                    .style("stroke", "black")
-                    .style("pointer-events", function() {
-                        if (isBrushing) return "none";
-                        if (!isBrushing) return "auto";
-                    })
-                    .style("fill", "transparent");
+                    // Hide color scale legend
+                    d3.select("g.colorScale1").style("opacity",0);
+                    d3.select("g.colorScale2").style("opacity",0);
+                })
+                .style("z-index", 1000)
+                .style("stroke-width", "1px")
+                .style("stroke", "black")
+                .style("pointer-events", function() {
+                    if (isBrushing) return "none";
+                    if (!isBrushing) return "auto";
+                })
+                .style("fill", "transparent");
         }
 
         function resetMap() {
@@ -474,6 +470,8 @@
 
             setTimeout(function() {
                 d3.selectAll("circle.blob").style("opacity", 1);
+                d3.select("g.colorScale1").style("opacity", 1);
+                d3.select("g.colorScale2").style("opacity", 1);
             }, 500)
 
             updateHourBarChartValues(coords);
@@ -521,9 +519,39 @@
 
         function plotIncidents(coords) {
             let districtNames = Object.keys(districtDict);
-            console.log(districtNames)
+
+            plotColorScales();
+
+            // Fjerner district med tomt navn
+            var index = districtNames.indexOf("");
+            if (index > -1) {
+                districtNames.splice(index, 1);
+            }
+
+            var incMaxLength = 0;
+            var vioMaxLength = 0;
             districtNames.forEach(name => {
-                blob = blobDict[name]
+                var vioCount = 0;
+                var incCount = 0;
+
+                var data = districtDict[name]
+
+                data.forEach(d => {
+                    if (d.type == 'incident') incCount++;
+                    if (d.type == 'violation') vioCount++;
+                })
+
+                if (incMaxLength < incCount) {
+                    incMaxLength = incCount;
+                }
+
+                if (vioMaxLength < vioCount) {
+                    vioMaxLength = vioCount;
+                }
+            })
+
+            districtNames.forEach(name => {
+                let blob = blobDict[name]
                 data = districtDict[name]
 
                 var incLons = 0, vioLons = 0;
@@ -542,159 +570,204 @@
                     }
                 })
 
-                var xx = incLons/incCount;
-                var yy = incLats/incCount;
-
-                var xx1 = vioLons/vioCount;
-                var yy1 = vioLats/vioCount;
-
                 if (blob == undefined) {
                     blob = {
                         'radius': 10,
                         'x': 100,
                         'y': 100,
                         'x1': 150,
-                        'y1': 100
+                        'y1': 100,
                     }
                 }
+
+                var xx = incLons/incCount;
+                var yy = incLats/incCount;
+
+                var xx1 = vioLons/vioCount;
+                var yy1 = vioLats/vioCount;
 
                 var x = projection([xx, yy])[0];
                 var y = projection([xx, yy])[1];
 
-                var circleBlob = svg.append("circle")
-                                    .attr("class", "blob")
-                                    // .attr("cx", xx)
-                                    // .attr("cy", yy)
-                                    .attr("cx", function(d) {
-                                        return x;
-                                    })
-                                    .attr("cy", function(d) {
-                                        return y;
-                                    })
-                                    // .attr("r", Math.sqrt(data.length)/5)
-                                    .attr("r", 7)
-                                    .attr("fill", "red")
-                                    .on("mouseover", function(d) {
-                                        // Tooltip
-                                        div.transition()		
-                                            .duration(200)		
-                                            .style("opacity", .9);
+                var incColorScale = d3.scaleLinear()
+                                        .domain([0,0.5,1])
+                                        .range(["orange","darkorange","red"]);
 
-                                        div.html(name + "</br>Number of incidents: " + incCount)	
-                                            .style("left", (d3.event.pageX) + "px")		
-                                            .style("top", (d3.event.pageY - 28) + "px");
-                                        
-                                    })
-                                    .on("mouseout", function(e) {
-                                        div.transition()		
-                                            .duration(500)		
-                                            .style("opacity", 0);
-                                    })
+                var vioColorScale = d3.scaleLinear()
+                                        .domain([0,0.5,1])
+                                        .range(["khaki", "darkkhaki", "green"]);
+
+                var incColorFraction = incCount / incMaxLength;
+                var vioColorFraction = vioCount / vioMaxLength;
+
+                svg.append("circle")
+                    .attr("class", "blob")
+                    .attr("cx", x)
+                    .attr("cy", y)
+                    // .attr("cx", blob.x)
+                    // .attr("cy", blob.y)
+                    // .attr("r", Math.sqrt(data.length)/5)
+                    .attr("r", 10)
+                    .style("opacity", 1)
+                    .attr("fill", function() { 
+                        return incColorScale(incColorFraction)
+                    })
+                    .on("mouseover", function(d) {
+                        // Tooltip
+                        if (d3.select(this).style("opacity") == 1) {
+                            div.transition()		
+                                .duration(200)		
+                                .style("opacity", .9);
+
+                            div.html(name + "</br>Number of incidents: " + incCount)	
+                                .style("left", (d3.event.pageX) + "px")		
+                                .style("top", (d3.event.pageY - 28) + "px");
+                        }
+                        
+                    })
+                    .on("mouseout", function(e) {
+                        if (d3.select(this).style("opacity") > 0.5) {
+                            div.transition()		
+                                .duration(500)		
+                                .style("opacity", 0);
+                        }
+                    })
                                 
                 var x1 = projection([xx1, yy1])[0];
                 var y1 = projection([xx1, yy1])[1];
 
-                console.log(x1, y1, name)
                 x1 = (x1) ? x1 : x + 15;
                 y1 = (y1) ? y1 : y;
 
                 svg.append("circle")
                     .attr("class", "blob")
-                    .attr("cx", function(d) {
-                        return x1;
-                    })
-                    .attr("cy", function(d) {
-                        return y1;
-                    })
-                    .attr("r", 7)
-                    .attr("fill", "orange")
+                    // .attr("cx", blob.x1)
+                    // .attr("cy", blob.y1)
+                    .attr("cx", x1)
+                    .attr("cy", y1)
+                    .attr("r", 10)
+                    .attr("fill", vioColorScale(vioColorFraction))
+                    .style("opacity", 1)
                     .on("mouseover", function(d) {
                         // Tooltip
-                        div.transition()		
-                            .duration(200)		
-                            .style("opacity", .9);
+                        if (d3.select(this).style("opacity") == 1) {
+                            div.transition()		
+                                .duration(200)		
+                                .style("opacity", .9);
 
-                        div.html(name + "</br>Number of violations: " + vioCount)	
-                            .style("left", (d3.event.pageX) + "px")		
-                            .style("top", (d3.event.pageY - 28) + "px");
+                            div.html(name + "</br>Number of violations: " + vioCount)	
+                                .style("left", (d3.event.pageX) + "px")		
+                                .style("top", (d3.event.pageY - 28) + "px");
+                        }
                         
                     })
                     .on("mouseout", function(e) {
-                        div.transition()		
-                            .duration(500)		
-                            .style("opacity", 0);
+                        if (d3.select(this).style("opacity") > 0.5) {
+                            div.transition()		
+                                .duration(500)		
+                                .style("opacity", 0);
+                        }
                     });
             })
 
-            // circles = svg.append("g")
-            //             .attr("class", "hiddenPoints")
-            //             .selectAll(".point")
-            //             .data(coords)
-            //             .enter()
-            //             .append("circle")
-            //             .attr("clip-path", "url(#clip)")
-            //             .attr("cx", function(d) {
-            //                 return projection([d.lon, d.lat])[0];
-            //             })
-            //             .attr("cy", function(d) {
-            //                 return projection([d.lon, d.lat])[1];
-            //             })
-            //             .attr("r", circleRadius)
-            //             .attr("opacity", 0)
-            //             .attr("class", "non_brushed_circle");
+            
+        }
 
-            // let districtNames = Object.keys(districtDict);
-            // districtNames.forEach(d => {
-            //     let districtClass = "district" + d.replace(/\s/g, '').replace(/\//g, '');
-            //     var circleData = svg.append("g")
-            //                 .attr("class", districtClass)
-            //                 .attr("opacity",1)
-            //                 .selectAll(".point")
-            //                 .data(districtDict[d])
-            //                 .enter()
-            //                 .append("circle")
-            //                 .attr("clip-path", "url(#clip)")
-            //                 .attr("cx", function(d) {
-            //                     return projection([d.lon, d.lat])[0];
-            //                 })
-            //                 .attr("cy", function(d) {
-            //                     return projection([d.lon, d.lat])[1];
-            //                 })
-            //                 .attr("r", circleRadius)
-            //                 .attr("fill", function(d) {
-            //                     if(d.type == 'violation') {
-            //                         return "orange";
-            //                     } else return "red";
-            //                 })
-            //                 .attr("name", "hidden")
-            //                 .on("mouseover", function(d) {
-            //                     // Tooltip
-            //                     if (d3.select("g." + districtClass).attr("opacity") == 1) {
-            //                         div.transition()		
-            //                             .duration(200)		
-            //                             .style("opacity", .9);
-                                    
-            //                         var desc;
-            //                         if (d.type == 'violation') {
-            //                             desc = "<b>Violation Description:</b></br> " + d.desc
-            //                         } else {
-            //                             desc = "<b>Incident Description:</b></br> " + d.desc
-            //                         }
+        function plotColorScales() {
+            var incColorScale = d3.scaleLinear()
+                                    .domain([0,0.5,1])
+                                    .range(["orange","darkorange", "red"]);
 
-            //                         div.html("<b>Date:</b> " + d.date + "</br></br>" + desc)	
-            //                             .style("left", (d3.event.pageX) + "px")		
-            //                             .style("top", (d3.event.pageY - 28) + "px");
-                                    
-            //                     }
-            //                 })
-            //                 .on("mouseout", function(e) {
-            //                     div.transition()		
-            //                         .duration(500)		
-            //                         .style("opacity", 0);
-            //                 })
-                
-            //     circleDict[d] = circleData;
-            // })
+            var vioColorScale = d3.scaleLinear()
+                                    .domain([0,0.5,1])
+                                    .range(["khaki", "darkkhaki", "green"]);
+            var data = [];
+            for (let i = 0.05; i <= 1; i += 0.05) {
+                data.push(i);
+            }
+
+            // First color scale
+            svg.append("g")
+                .attr("class", "colorScale1")
+                .selectAll("scale")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("x", function(d) {
+                    return 50 + 150 * d;
+                })
+                .attr("y", 25)
+                .attr("width", 10)
+                .attr("height", 30)
+                .attr("fill", function(d) {
+                    return incColorScale(d);
+                })
+
+            // Title label
+            d3.select("g.colorScale1")
+                .append("text")
+                .style("font-size", "17px")
+                .attr("x", 60)
+                .attr("y", 20)
+                .text("Fire incidents");
+
+            // Min label
+            d3.select("g.colorScale1")
+                .append("text")
+                .style("font-size", "12px")
+                .attr("x", 60)
+                .attr("y", 50 + 30/2 + 7)
+                .text("Min");
+
+            // Max label
+            d3.select("g.colorScale1")
+                .append("text")
+                .style("font-size", "12px")
+                .attr("x", 180)
+                .attr("y", 50 + 30/2 + 7)
+                .text("Max");
+
+
+            // Other color scale
+            svg.append("g")
+                .attr("class", "colorScale2")
+                .selectAll("scale2")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("x", function(d) {
+                    return 50 + 150 * d;
+                })
+                .attr("y", 110)
+                .attr("width", 10)
+                .attr("height", 30)
+                .attr("fill", function(d) {
+                    return vioColorScale(d);
+                })
+
+            // Title label
+            d3.select("g.colorScale2")
+                .append("text")
+                .style("font-size", "17px")
+                .attr("x", 60)
+                .attr("y", 105)
+                .text("Violations");
+
+            // Min label
+            d3.select("g.colorScale2")
+                .append("text")
+                .style("font-size", "12px")
+                .attr("x", 60)
+                .attr("y", 135 + 30/2 + 7)
+                .text("Min");
+
+            // Max label
+            d3.select("g.colorScale2")
+                .append("text")
+                .style("font-size", "12px")
+                .attr("x", 180)
+                .attr("y", 135 + 30/2 + 7)
+                .text("Max");
         }
 
         function plotCirclesInDistrict(districtData, districtName) {
