@@ -2,12 +2,11 @@
 <html lang="en">
   <head>
       <meta charset="utf-8">
-      <title>D3 Page Template</title>
+      <title>San Francisco - Fire!</title>
 
       <link type="text/css" href="stylesheet.css" rel="stylesheet">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
       <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
-      <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 
       <style>
         h1.title, h1.title-loader {
@@ -407,7 +406,7 @@
                         .duration(500)
                         .attr("d", path);
 
-
+                    createBrush();
                     // Show reset button
                     d3.select("p.reset")
                         .transition()
@@ -463,8 +462,7 @@
                 .style("pointer-events", "auto");
             d3.selectAll("circle")
                 .style("pointer-events", "auto");
-            d3.select("rect.overlay")
-                .attr("height", h);
+            d3.select("g.brush").remove();
             d3.select("rect.selection")
                 .attr("height", 1)
                 .attr("width", 1)
@@ -488,6 +486,7 @@
 
             // Update hourChart with all data
             d3.selectAll("circle.point").remove();
+            circles.remove();
 
             setTimeout(function() {
                 d3.selectAll("circle.blob").style("opacity", 1);
@@ -793,7 +792,7 @@
 
         function plotCirclesInDistrict(districtData, districtName) {
             let districtClass = "district" + districtName.replace(/\s/g, '').replace(/\//g, '');
-            var circleData = svg.append("g")
+            circles = svg.append("g")
                                 .attr("class", districtClass)
                                 .attr("opacity",1)
                                 .selectAll(".point")
@@ -1401,9 +1400,6 @@
                 .attr("x", 0 - (hBar / 2) -130) 
                 .attr("dy", "1em")
                 .text("# of violations and incidents"); 
-
-
-
         }
 
         function brushed() {
