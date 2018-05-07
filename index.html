@@ -66,8 +66,7 @@
 
         .line {
             fill: none;
-            stroke: teal;
-            stroke-width: 0.5;
+            stroke-width: 0.7;
         }
         p.brødtekst {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -251,6 +250,28 @@
         function convertDate(dateString) {
             var date = new Date(dateString);
             return date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear();
+        }
+
+        function convertToDates(dateString) {
+            var newDatesString = ""
+            var split = dateString.split('/');
+            var day, month;
+            if(split[0].length < 2) {
+                day = "0" + split[0]
+            } else {
+                day = split[0]
+            }
+            if(split[1].length < 2) {
+                if(split[1] == '9') {
+                    month = '10';
+                } else {
+                    month = "0" + (parseInt(split[1])+ 1)
+                }
+            } else {
+                month = split[1]
+            }
+            var returnDate = month + "/" + day + "/" + split[2];
+            return returnDate;
         }
 
         var isBrushing = false;
@@ -1269,61 +1290,117 @@
             
             var filteredIncidents = d3.nest()
                 .key(function(d) {
-                    return d.date;
+                    return convertToDates(d.date);
                 })
                 .entries(tempIncidents);
 
             var filteredViolations = d3.nest()
                 .key(function(d) {
-                    return d.date;
+                    return convertToDates(d.date);
                 })
                 .entries(tempViolations);
 
             
 
             var sortIncidents = filteredIncidents;
+            sortIncidents.forEach(function(d) {
+                d.key = new Date(d.key);
+            })
+
+             sortIncidents.sort(function(a,b){
+                // Turn your strings into dates, and then subtract them
+                // to get a value that is either negative, positive, or zero.
+                return new Date(b.key) - new Date(a.key);
+            });
+
             var sortViolations = filteredViolations;
-            console.log(typeof(sortIncidents[0].key))
-            console.log(typeof(sortIncidents[0].values.length))
+            sortViolations.forEach(function(d) {
+                d.key = new Date(d.key);
+            })
+            
+ 
+            sortViolations.sort(function(a,b){
+                // Turn your strings into dates, and then subtract them
+                // to get a value that is either negative, positive, or zero.
+                return new Date(b.key) - new Date(a.key);
+            });
+
+
+
+            var testData1 = [
+                {key: new Date('01/21/2017'), values: [0,0,0]},
+                {key: new Date('01/20/2017'), values: [0,0,0,0,0,0,0,0]},
+                {key: new Date('02/23/2017'), values: [0,0,0,0,0]},
+                {key: new Date('01/24/2017'), values: [0,0,0,0,0,0,0,0,0,0,0]},
+            ];
 
             // set the ranges
-            var x = d3.scaleTime().range([0, wBar]);
+            var x = d3.scaleTime().range([0, w-300]);
             var y = d3.scaleLinear().range([hBar, 0]);
 
             // define the line
             var valueline = d3.line()
-                                .x(function(d) { return x(d.key); })
+                                .x(function(d) { return x( d.key); })
                                 .y(function(d) { 
                                     return y(d.values.length); });
 
 
-            x.domain(d3.extent(sortIncidents, function(d) { 
+            x.domain(d3.extent(sortViolations, function(d) { 
                 return d.key; }));
-            y.domain([0, d3.max(sortIncidents, function(d) {
+            y.domain([0, d3.max(sortViolations, function(d) {
                 return d.values.length; })]);
             
+            var paddingLeft = 30;
+            var titlePadding = 50;
 
 
             svgLineChart.append("path")
                 .data([sortIncidents])
                 .attr("class", "line")
+                .attr("stroke", "teal")
+                .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("d", valueline);
 
             svgLineChart.append("path")
                 .data([sortViolations])
                 .attr("class", "line")
                 .attr("stroke", "red")
+                .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("d", valueline);
 
             // Add the X Axis
             svgLineChart.append("g")
-                .attr("transform", "translate(0," + hBar + ")")
+                .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (hBar+titlePadding) + ")")
                 .call(d3.axisBottom(x));
 
             // Add the Y Axis
             svgLineChart.append("g")
+                .attr("transform", "translate(" + (margin.left+paddingLeft) + "," + titlePadding +")")
                 .call(d3.axisLeft(y));
 
+            // Title label
+            svgLineChart.append("text")
+                        .attr("class", "violationBarTitle")
+                        .attr("x", w/2)
+                        .attr("y",  0)
+                        .attr("dy", "1em")
+                        .text("Violations and Incidents over time");
+
+            // X-Label
+            svgLineChart.append("text")
+                    .attr("class", "legendText")
+                    .attr("x", w/2)
+                    .attr("y",  hBar + 50+titlePadding)
+                    .text("Date");
+
+            // Y-Label
+            svgLineChart.append("text")
+                .attr("class", "legendText")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 5)
+                .attr("x", 0 - (hBar / 2) -130) 
+                .attr("dy", "1em")
+                .text("# of violations and incidents"); 
 
 
 
