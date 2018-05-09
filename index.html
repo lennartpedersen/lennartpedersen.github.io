@@ -11,8 +11,22 @@
       <style>
         h1.title, h1.title-loader {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-            font-size: 48px;
+            font-size: 42px;
             text-align: center;
+        }
+
+        h1.pageTitle {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font-size: 60px;
+            text-align: center;
+            opacity: 0;
+        }
+
+        h1.sectionHeader {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font-size: 36px;
+            text-align: left;
+            opacity: 0;
         }
 
         text {
@@ -38,7 +52,19 @@
         }
 
         div.container {
-            height: 200px;
+            height: 2000px;
+            width: 1000px;
+
+            bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+
+            margin: auto;
+        }
+
+        div.linechart {
+            height: 500px;
             width: 1000px;
 
             bottom: 0;
@@ -73,32 +99,65 @@
             stroke-width: 0.7;
         }
 
-        p.brødtekst {
+        p {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             opacity: 0;
         }
 
       </style>
   </head>
+
+
   <body>
       <a href="explainer.html">Explainer page</a>
       <h1 class="title-loader">
-            <p>Loading</p>
             <i class="fa fa-refresh fa-spin" style="font-size:96px"></i>
       </h1>
 
-      <h1 class="title" style="opacity: 0;">
-          San Francisco
+      <h1 class="pageTitle">
+        San Francisco is on fire!
       </h1>
 
       <div class="container">
-          <p class="brødtekst">
-            The city of San Fransisco is the home of a lot of fiery incidents!
+          <p>
+            The city of San Francisco is the home of a lot of fiery incidents! From XXXX to 2018 there has been 
+            recorded more than XX,XXX incidents of fire. Fires happen for a lot of different reasons - cooking fires,
+            building fires, vehicle and general outdoor fires are among the first things we think about when thinking about fires.
+            And San Francisco are no stranger to these types of fires. </br></br>
+
+            But why does the fires occur? Like any other city; San Francisco has a fire code which establishments, apartment buildings, houses, etc.
+            has to live up to. Approved fire emergency plans, ownership of extinguishers and correctly placed, working fire alarms are key to preventing fires.
+            The city of SF follow up on these places to check whether they violate the firecode, to ensure a better quality of fire safety. </br></br>
+            
+            What information can we find about the relationship between violations and incidents in terms of occurences, types and 
+            time of day? To answer this we have created the map below. It contains all districts of SF and the violations and incidents in those districts using data from 
+            <a href="https://datasf.org/opendata/">datasf.org</a>. </br></br>
+
+            Explore the map and read on!
           </p>
-          <p class="brødtekst">
-            <i>(Click on a area to view the data in that district, or use the brush on the full map.)</i>
+          
+          <h1 class="title" style="opacity: 0;">
+              San Francisco City
+          </h1>
+          <p style="text-align: center; font-size: 12px; margin-top: -25px; color: darkgray">
+            Hover over circles to see number of incidents/violations in that district. </br>
+            Click on a area to view the data in that district. 
           </p>
       </div>
+
+      <div class="linechart">
+          <p>
+              It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco.
+          </p>
+
+          <h1 class="sectionHeader">Has it always been this way?</h1>
+          <p>There is data in our line chart</p>
+      </div>
+
+
+
+
+
     <script>
 
         function removeLoader() {
@@ -107,7 +166,9 @@
 
         function showTitleAndText() {
             d3.select("h1.title").style("opacity", 1);
-            d3.selectAll("p.brødtekst").style("opacity", 1);
+            d3.select("h1.pageTitle").style("opacity", 1);
+            d3.select("h1.sectionHeader").style("opacity", 1);
+            d3.selectAll("p").style("opacity", 1);
 
             d3.select("div.container")
                     .attr("height", h);
@@ -128,14 +189,9 @@
         d3.select("div.container")
             .append("p")
             .attr("class", "reset")
-            .style("opacity", 0)
             .text("Reset map")
             .on("click", function() {
                 resetMap();
-                d3.select(this)
-                    .transition()
-                    .duration(500)
-                    .style("opacity", 0)
             });
 
         var svg = d3.select("div.container")
@@ -150,7 +206,7 @@
                             .attr("width", w)
                             .attr("height", hBar*2 + 200);
 
-        var svgLineChart = d3.select("div.container")
+        var svgLineChart = d3.select("div.linechart")
                             .append("svg")
                             .attr("width", w)
                             .attr("height", hBar + 100);
@@ -171,7 +227,7 @@
         var circleDict = {}; // Key: District name, Value: <circle> elements
         var coords;
 
-        var yearLimit = 2017;
+        var yearLimit = 2013;
 
         d3.csv("JustFires_New.csv", function(data) {
             coords = [];
@@ -179,59 +235,54 @@
             var count = 0;
             data.forEach(d => {
 
-                if (count < 100000) {
-                    var date = d["Incident Date"]
+                var date = d["Incident Date"]
+                var year = +date.substring(date.length - 4, date.length)
+                if (year >= yearLimit) {
+                    let dataRow = {
+                        'lon': +(d.Longitudes.slice(0,-1)),
+                        'lat': +d.Latitudes,
+                        'hour': +d.Hour - 1,
+                        'date': convertDate(d["Incident Date"]),
+                        'district': d["Neighborhood  District"],
+                        'index': d.Index,
+                        'fireType': d["Primary Situation"],
+                        'desc': d["Primary Situation Description"],
+                        'type': 'incident'
+                    };
+                    coords.push(dataRow);
+
+                    var arr = (districtDict[dataRow.district] == null) ? [] : districtDict[dataRow.district];
+                    arr.push(dataRow);
+                    districtDict[dataRow.district] = arr;
+
+                    count++;
+                } 
+            });
+            
+            count = 0;
+            d3.csv("New_Violations.csv", function(data) {
+                data.forEach(d => {
+                    var date = d["Violation Date"]
                     var year = +date.substring(date.length - 4, date.length)
-                    if (year >= yearLimit) {
+
+                    if(year >= yearLimit) {
                         let dataRow = {
-                            'lon': +(d.Longitudes.slice(0,-1)),
+                            'lon': +d.Longitudes,
                             'lat': +d.Latitudes,
-                            'hour': +d.Hour - 1,
-                            'date': convertDate(d["Incident Date"]),
-                            'district': d["Neighborhood  District"],
+                            'desc': d["Violation Item Description"],
+                            'date': convertDate(d["Violation Date"]),
+                            'district': d["Neighborhood District"],
+                            'violation': d["Violation Item"],
                             'index': d.Index,
-                            'fireType': d["Primary Situation"],
-                            'desc': d["Primary Situation Description"],
-                            'type': 'incident'
+                            'type': 'violation'
                         };
                         coords.push(dataRow);
 
                         var arr = (districtDict[dataRow.district] == null) ? [] : districtDict[dataRow.district];
                         arr.push(dataRow);
                         districtDict[dataRow.district] = arr;
-
+                        
                         count++;
-                    }
-
-                }
-            });
-            
-            count = 0;
-            d3.csv("New_Violations.csv", function(data) {
-                data.forEach(d => {
-                    if (count < 100000) {
-                        var date = d["Violation Date"]
-                        var year = +date.substring(date.length - 4, date.length)
-
-                        if(year >= yearLimit) {
-                            let dataRow = {
-                                'lon': +d.Longitudes,
-                                'lat': +d.Latitudes,
-                                'desc': d["Violation Item Description"],
-                                'date': convertDate(d["Violation Date"]),
-                                'district': d["Neighborhood District"],
-                                'violation': d["Violation Item"],
-                                'index': d.Index,
-                                'type': 'violation'
-                            };
-                            coords.push(dataRow);
-
-                            var arr = (districtDict[dataRow.district] == null) ? [] : districtDict[dataRow.district];
-                            arr.push(dataRow);
-                            districtDict[dataRow.district] = arr;
-                            
-                            count++;
-                        }
                     }
                 })
 
@@ -506,8 +557,8 @@
             updateFireTypeBarChartValues(coords);
             updateLineChartValues(coords);
         }
-
-        var blobDict = {
+/*
+        var blobDict1 = {
             'Seacliff': {
                 'radius': 10,
                 'x': -30,
@@ -747,6 +798,248 @@
                 'y1': 8,
             }
         };
+        */
+
+        var blobDict = {
+            'Mission': {
+                'radius': 10,
+                'x': 552.9243439756101,
+                'y': 362.15352721943054,
+                'x1': 576.746798200882,
+                'y1': 362.3567922397924
+            },
+            'Pacific Heights': {
+                'radius': 10,
+                'x': 477.3845246366691,
+                'y': 208.3975285938359,
+                'x1': 501.56092184910085,
+                'y1': 206.6742995265813
+            },
+            'Tenderloin': {
+                'radius': 10,
+                'x': 555.0667100171559,
+                'y': 255.0023655188852,
+                'x1': 575.887484624167,
+                'y1': 242.72138958488358
+            },
+            'Nob Hill': {
+                'radius': 10,
+                'x': 548.9240167323733,
+                'y': 208.87669966134126,
+                'x1': 571.1601522178971,
+                'y1': 206.26822700491175
+            },
+            'Sunset/Parkside': {
+                'radius': 10,
+                'x': 257.3751178914099,
+                'y': 385.7336807681131,
+                'x1': 283.8628058375907,
+                'y1': 384.8928169288556
+            },
+            'Potrero Hill': {
+                'radius': 10,
+                'x': 631.1932695200667,
+                'y': 371.96383635737584,
+                'x1': 654.3190806755447,
+                'y1': 371.1030683515419
+            },
+            'Lakeshore': {
+                'radius': 10,
+                'x': 272.77646512002684,
+                'y': 549.5548206226085,
+                'x1': 297.2896143242251,
+                'y1': 549.3441995754838
+            },
+            'Western Addition': {
+                'radius': 10,
+                'x': 481.18319553887704,
+                'y': 259.67771908509894,
+                'x1': 505.02554583357414,
+                'y1': 258.74759477822226
+            },
+            'Noe Valley': {
+                'radius': 10,
+                'x': 488.7308349570376,
+                'y': 419.64641977101564,
+                'x1': 512.586394337588,
+                'y1': 419.3963443108951
+            },
+            'Bernal Heights': {
+                'radius': 10,
+                'x': 548.0952149315272,
+                'y': 457.66689662024146,
+                'x1': 573.2975660310476,
+                'y1': 458.3056077232759
+            },
+            'Excelsior': {
+                'radius': 10,
+                'x': 522.8434609692777,
+                'y': 529.9515144467296,
+                'x1': 549.9789195510093,
+                'y1': 529.9866640266846
+            },
+            'Financial District/South Beach': {
+                'radius': 10,
+                'x': 617.529293951171,
+                'y': 226.38995981987682,
+                'x1': 639.3129240432172,
+                'y1': 214.1826621844375
+            },
+            'South of Market': {
+                'radius': 10,
+                'x': 592.2878074470791,
+                'y': 290.55956019158475,
+                'x1': 617.5730745836627,
+                'y1': 290.0875084688887
+            },
+            'Inner Sunset': {
+                'radius': 10,
+                'x': 366.90834727865877,
+                'y': 368.0633241602045,
+                'x1': 389.8062683591852,
+                'y1': 368.2756845986587
+            },
+            'Glen Park': {
+                'radius': 8,
+                'x': 493.3941727030324,
+                'y': 467.3242780638393,
+                'x1': 514.1412660642527,
+                'y1': 467.0751808224595
+            },
+            'Russian Hill': {
+                'radius': 10,
+                'x': 542.8136017845827,
+                'y': 173.52868246476282,
+                'x1': 564.8329225390335,
+                'y1': 173.35235743693192
+            },
+            'Ocean View': {
+                'radius': 10,
+                'x': 378.4472593579558,
+                'y': 568.7524658470065,
+                'x1': 402.00672980828676,
+                'y1': 568.3913497664325
+            },
+            'Bayview Hunters Point': {
+                'radius': 10,
+                'x': 639.7083340018289,
+                'y': 483.4944607182697,
+                'x1': 665.4876638739952,
+                'y1': 483.62870796440984
+            },
+            'Marina': {
+                'radius': 10,
+                'x': 473.97870453167707,
+                'y': 168.94872360429144,
+                'x1': 496.59066715301014,
+                'y1': 167.5563735141477
+            },
+            'Inner Richmond': {
+                'radius': 10,
+                'x': 361.50608354987344,
+                'y': 268.6242417470494,
+                'x1': 384.55481148837134,
+                'y1': 268.7920845876797
+            },
+            'Chinatown': {
+                'radius': 6,
+                'x': 592.567902058945,
+                'y': 192.4391834687267,
+                'x1': 595.0484102975461,
+                'y1': 206.42277426304645
+            },
+            'North Beach': {
+                'radius': 10,
+                'x': 584.1375016223174,
+                'y': 152.01857685443247,
+                'x1': 602.6291692794766,
+                'y1': 162.97294594298
+            },
+            'Castro/Upper Market': {
+                'radius': 10,
+                'x': 473.28621425741585,
+                'y': 351.48092473542783,
+                'x1': 498.12845925957663,
+                'y1': 351.9752062645275
+            },
+            'West of Twin Peaks': {
+                'radius': 10,
+                'x': 384.7061765997787,
+                'y': 473.40920501129585,
+                'x1': 408.96632161474554,
+                'y1': 472.839150157175
+            },
+            'Treasure Island': {
+                'radius': 10,
+                'x': 723.7942744137254,
+                'y': 48.18678537834785,
+                'x1': 736.5556558326934,
+                'y1': 71.18878857805976
+            },
+            'Outer Mission': {
+                'radius': 10,
+                'x': 447.6041791625903,
+                'y': 534.1982278995274,
+                'x1': 472.4741389808478,
+                'y1': 533.5098581422644
+            },
+            'Presidio': {
+                'radius': 10,
+                'x': 364.3313983961707,
+                'y': 186.0295859327016,
+                'x1': 389.3313983961707,
+                'y1': 186.0295859327016
+            },
+            'Presidio Heights': {
+                'radius': 9,
+                'x': 409.64876784122316,
+                'y': 237.48725542234024,
+                'x1': 431.9033932235907,
+                'y1': 235.15074485653895
+            },
+            'Outer Richmond': {
+                'radius': 10,
+                'x': 257.6012087520794,
+                'y': 281.1481836050516,
+                'x1': 281.95227121026255,
+                'y1': 280.5307195520436
+            },
+            'Golden Gate Park': {
+                'radius': 10,
+                'x': 289.7807789108483,
+                'y': 320.5793662412616,
+                'x1': 315.3522542458959,
+                'y1': 320.2633309325902
+            },
+            'Twin Peaks': {
+                'radius': 10,
+                'x': 421.48287230124697,
+                'y': 405.604835337901,
+                'x1': 442.81744288658956,
+                'y1': 405.123688059306
+            },
+            'Visitacion Valley': {
+                'radius': 10,
+                'x': 558.3742838432663,
+                'y': 584.1143097104505,
+                'x1': 582.2334912163205,
+                'y1': 583.8339213161962
+            },
+            'Haight Ashbury': {
+                'radius': 10,
+                'x': 437.804881326796,
+                'y': 315.35203061965876,
+                'x1': 460.95335199293913,
+                'y1': 314.6897799776343
+            },
+            'Seacliff': {
+                'radius': 10,
+                'x': 234.23334182507824,
+                'y': 243.9108217509347,
+                'x1': 259.23334182507824,
+                'y1': 243.9108217509347
+            }
+        }
 
         function plotIncidents(coords) {
             let districtNames = Object.keys(districtDict);
@@ -801,15 +1094,15 @@
                     }
                 })
 
-                if (blob == undefined) {
-                    blob = {
-                        'radius': 10,
-                        'x': 0,
-                        'y': 0,
-                        'x1': 0,
-                        'y1': 0,
-                    }
-                }
+                // if (blob == undefined) {
+                //     blob = {
+                //         'radius': 10,
+                //         'x': 0,
+                //         'y': 0,
+                //         'x1': 0,
+                //         'y1': 0,
+                //     }
+                // }
 
                 var xx = incLons/incCount;
                 var yy = incLats/incCount;
@@ -833,8 +1126,8 @@
 
                 svg.append("circle")
                     .attr("class", "blob")
-                    .attr("cx", x + blob.x)
-                    .attr("cy", y + blob.y)
+                    .attr("cx", blob.x)
+                    .attr("cy", blob.y)
                     // .attr("cx", blob.x)
                     // .attr("cy", blob.y)
                     // .attr("r", Math.sqrt(data.length)/5)
@@ -870,12 +1163,20 @@
                 x1 = (x1) ? x1 : x + 15;
                 y1 = (y1) ? y1 : y;
 
+                // console.log('\'' + name + '\': {\n' + '\t\'radius\': ' + blob.radius + 
+                // ',\n\t\'x\': ' + (x + blob.x) + 
+                // ',\n\t\'y\': ' + (y+blob.y) +
+                // ',\n\t\'x1\': ' + (x1+blob.x1) + 
+                // ',\n\t\'y1\': ' + (y1+blob.y1) + 
+                // '\n},'
+                // )
+
                 svg.append("circle")
                     .attr("class", "blob")
                     // .attr("cx", blob.x1)
                     // .attr("cy", blob.y1)
-                    .attr("cx", x1 + blob.x1)
-                    .attr("cy", y1 + blob.y1)
+                    .attr("cx", blob.x1)
+                    .attr("cy", blob.y1)
                     .attr("r", blob.radius)
                     .attr("fill", vioColorScale(vioColorFraction))
                     .style("opacity", 1)
@@ -1586,7 +1887,7 @@
             // Title label
             svgLineChart.append("text")
                 .attr("class", "LineChartTitle")
-                .attr("x", w/2)
+                .attr("x", w/2 - 175)
                 .attr("y",  0)
                 .attr("dy", "1em")
                 .text("Violations and Incidents over time");
@@ -1594,7 +1895,7 @@
             // X-Label
             svgLineChart.append("text")
                 .attr("class", "legendText")
-                .attr("x", w/2)
+                .attr("x", w/2 - 100)
                 .attr("y",  hBar + 50+titlePadding)
                 .text("Date");
 
