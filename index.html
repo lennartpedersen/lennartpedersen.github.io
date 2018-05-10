@@ -514,7 +514,6 @@
                     updateLineChartValues(districtData)
 
                     // Move circles correspondly
-                    updateCirclePositions(districtName,zoomMultiplier);
                     d3.selectAll("circle.blob").style("opacity", 0);
 
                     // Hide color scale legend
@@ -554,8 +553,6 @@
                 .transition()
                 .duration(500)
                 .attr("d", path);
-
-            updateCirclePositions('all', 1);
 
             // Update titles
             d3.selectAll("text.barChartTitle")
@@ -1092,7 +1089,6 @@
                                 .enter()
                                 .append("circle")
                                 .attr("class", "point")
-                                .attr("clip-path", "url(#clip)")
                                 .attr("cx", function(d) {
                                     return projection([d.lon, d.lat])[0];
                                 })
