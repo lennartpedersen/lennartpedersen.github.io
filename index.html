@@ -473,16 +473,16 @@
                     path = path.projection(projection);
 
                     // Remove brush
-                    d3.select("rect.overlay")
+                    svg.select("rect.overlay")
                         .attr("height", 0);
 
-                    d3.select("rect.selection")
+                    svg.select("rect.selection")
                         .attr("height", 1)
                         .attr("width", 1)
                         .attr("opacity",0);
 
                     // Zoom into map area
-                    d3.selectAll("path")
+                    svg.selectAll("path.map")
                         .transition()
                         .duration(500)
                         .attr("d", path);
@@ -541,15 +541,15 @@
                 .style("pointer-events", "auto");
             d3.selectAll("circle")
                 .style("pointer-events", "auto");
-            d3.select("g.brush").remove();
-            d3.select("rect.selection")
+            svg.select("g.brush").remove();
+            svg.select("rect.selection")
                 .attr("height", 1)
                 .attr("width", 1)
                 .attr("opacity",0);
 
             path = path.projection(projection);
 
-            d3.selectAll("path")
+            svg.selectAll("path.map")
                 .transition()
                 .duration(500)
                 .attr("d", path);
@@ -1561,9 +1561,7 @@
                 .key(function(d) {
                     return convertToDates(d.date);
                 })
-                .entries(tempViolations);
-
-            
+                .entries(tempViolations);            
 
             var sortIncidents = filteredIncidents;
             sortIncidents.forEach(function(d) {
@@ -1587,8 +1585,6 @@
                 // to get a value that is either negative, positive, or zero.
                 return new Date(b.key) - new Date(a.key);
             });
-
-
 
             x.domain(d3.extent(sortViolations, function(d) { 
                 return d.key; }));
