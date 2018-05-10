@@ -27,13 +27,14 @@
             font-size: 36px;
             text-align: left;
             opacity: 0;
+            margin-left: 10%;
         }
 
         text {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         }
 
-        text.hourBarTitle, text.violationBarTitle {
+        text.barChartTitle {
             font-size: 20px;
         }
 
@@ -52,8 +53,8 @@
         }
 
         div.container {
-            height: 2000px;
-            width: 1000px;
+            height: 1000px;
+            width: 1250px;
 
             bottom: 0;
             top: 0;
@@ -63,16 +64,26 @@
             margin: auto;
         }
 
+        div.mapDiv {
+            width: 55%;
+            height: 1000px;
+            float: left;
+        }
+
+        div.chartDiv {
+            height: 1000px;
+        }
+
         div.linechart {
             height: 500px;
-            width: 1000px;
+            width: auto;
 
             bottom: 0;
             top: 0;
             left: 0;
             right: 0;
 
-            margin: auto;
+            /* margin: auto; */
         }
 
         rect.selection {
@@ -102,6 +113,13 @@
         p {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             opacity: 0;
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        svg.lineChart {
+            margin-left: 10%;
+            margin-right: 10%;
         }
 
       </style>
@@ -143,16 +161,21 @@
             Hover over circles to see number of incidents/violations in that district. </br>
             Click on a area to view the data in that district. 
           </p>
+          <div class="mapDiv"></div>
+          <div class="chartDiv">
+          </div>
+
+          <div class="linechart">
+            <p>
+                It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco.
+            </p>
+  
+            <h1 class="sectionHeader">Has it always been this way?</h1>
+            <p>There is data in our line chart</p>
+        </div>
       </div>
 
-      <div class="linechart">
-          <p>
-              It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco.
-          </p>
-
-          <h1 class="sectionHeader">Has it always been this way?</h1>
-          <p>There is data in our line chart</p>
-      </div>
+      
 
 
 
@@ -175,7 +198,7 @@
         }
 
         var margin = {top: 20, right: 20, bottom: 30, left: 50}
-        var w = 1400 - margin.left - margin.right;
+        var w = 1000 - margin.left - margin.right;
         var h = 700 - margin.top - margin.bottom;
         var padding = 1;
         var wBar = 500 - margin.left - margin.right;
@@ -186,7 +209,7 @@
         var fireTypes = [];
 
         // Reset button
-        d3.select("div.container")
+        d3.select("div.mapDiv")
             .append("p")
             .attr("class", "reset")
             .text("Reset map")
@@ -194,22 +217,23 @@
                 resetMap();
             });
 
-        var svg = d3.select("div.container")
+        var svg = d3.select("div.mapDiv")
                     .append("svg")
-                    .attr("width", w)
+                    .attr("width", "auto")
                     .attr("height", h)
                     .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var svgHourBar = d3.select("div.container")
+        var svgHourBar = d3.select("div.chartDiv")
                             .append("svg")
-                            .attr("width", w)
-                            .attr("height", hBar*2 + 200);
+                            .attr("width", w/2 + 50)
+                            .attr("height", hBar*4 + 200);
 
         var svgLineChart = d3.select("div.linechart")
                             .append("svg")
+                            .attr("class", "lineChart")
                             .attr("width", w)
-                            .attr("height", hBar + 100);
+                            .attr("height", hBar + 400);
 
         var div = d3.select("body")
                     .append("div")	
@@ -366,6 +390,7 @@
                 })
         }
 
+        var mapOffSetX = 10;
         function createMap(json) {
 
             // https://stackoverflow.com/questions/14492284/center-a-map-in-d3-given-a-geojson-object
@@ -376,7 +401,7 @@
             mapCenter = center;
 
             var scale  = 150;
-            var offset = [w/2, h/3];
+            var offset = [(w/2) + mapOffSetX, h/3];
 
             projection = d3.geoMercator()
                             .center(center)
@@ -414,7 +439,6 @@
                 .enter()
                 .append("path")
                 .attr("class", "map")
-                .attr("clip-path", "url(#clip)")
                 .attr("d", path)
                 .on("mouseover", function(d) {
                     d3.select(this)
@@ -444,7 +468,7 @@
                     projection = d3.geoMercator()
                                     .center(d3.geoCentroid(d))
                                     .scale(zoomScale)
-                                    .translate(mapOffset);
+                                    .translate([mapOffset[0] + 80, mapOffset[1]]);
 
                     path = path.projection(projection);
 
@@ -471,11 +495,9 @@
                         .style("opacity",1);
 
                     // Update title label
-                    d3.select("text.hourBarTitle")
+                    d3.selectAll("text.barChartTitle")
                         .text(districtName);
 
-                    d3.select("text.violationBarTitle")
-                        .text(districtName);
 
                     d3.selectAll("circle.point").remove();
 
@@ -535,11 +557,8 @@
 
             updateCirclePositions('all', 1);
 
-            // Update title
-            d3.select("text.hourBarTitle")
-                .text("All districts");
-            
-            d3.select("text.violationBarTitle")
+            // Update titles
+            d3.selectAll("text.barChartTitle")
                 .text("All districts");
 
             // Update hourChart with all data
@@ -557,248 +576,6 @@
             updateFireTypeBarChartValues(coords);
             updateLineChartValues(coords);
         }
-/*
-        var blobDict1 = {
-            'Seacliff': {
-                'radius': 10,
-                'x': -30,
-                'y': 0,
-                'x1': -20,
-                'y1': 0,
-            },
-            'Outer Richmond': {
-                'radius': 10,
-                'x': -15,
-                'y': 7,
-                'x1': 0,
-                'y1': 15,
-            },
-            'Golden Gate Park': {
-                'radius': 10,
-                'x': 0,
-                'y': 5,
-                'x1': 5,
-                'y1': -4,
-            },
-            'Sunset/Parkside': {
-                'radius': 10,
-                'x': -10,
-                'y': -20,
-                'x1': 50,
-                'y1': -25,
-            },
-            'Lakeshore': {
-                'radius': 10,
-                'x': -40,
-                'y': 0,
-                'x1': -15,
-                'y1': -8,
-            },
-            'Presidio': {
-                'radius': 10,
-                'x': -35,
-                'y': 20,
-                'x1': -25,
-                'y1': 20,
-            },
-            'Inner Richmond': {
-                'radius': 10,
-                'x': -42,
-                'y': 0,
-                'x1': -20,
-                'y1': 3,
-            },
-            'Inner Sunset': {
-                'radius': 10,
-                'x': -12,
-                'y': 10,
-                'x1': 10,
-                'y1': 21,
-            },
-            'West of Twin Peaks': {
-                'radius': 10,
-                'x': -12,
-                'y': -10,
-                'x1': -20,
-                'y1': -15,
-            },
-            'Ocean View': {
-                'radius': 10,
-                'x': -15,
-                'y': 0,
-                'x1': -10,
-                'y1': 27,
-            },
-            'Presidio Heights': {
-                'radius': 9,
-                'x': -16,
-                'y': 0,
-                'x1': 10,
-                'y1': -7,
-            },
-            'Haight Ashbury': {
-                'radius': 10,
-                'x': -18,
-                'y': -2,
-                'x1': 13,
-                'y1': -10,
-            },
-            'Twin Peaks': {
-                'radius': 10,
-                'x': -10,
-                'y': -5,
-                'x1': 12,
-                'y1': -10,
-            },
-            'Outer Mission': {
-                'radius': 10,
-                'x': -5,
-                'y': -20,
-                'x1': 10,
-                'y1': -10,
-            },
-            'Marina': {
-                'radius': 10,
-                'x': -10,
-                'y': 0,
-                'x1': 8,
-                'y1': -8,
-            },
-            'Pacific Heights': {
-                'radius': 10,
-                'x': -21,
-                'y': -10,
-                'x1': -2,
-                'y1': -4,
-            },
-            'Western Addition': {
-                'radius': 10,
-                'x': -27,
-                'y': -10,
-                'x1': -5,
-                'y1': -5,
-            },
-            'Castro/Upper Market': {
-                'radius': 10,
-                'x': -25,
-                'y': 10,
-                'x1': 0,
-                'y1': 5,
-            },
-            'Noe Valley': {
-                'radius': 10,
-                'x': -12,
-                'y': 0,
-                'x1': -5,
-                'y1': 0,
-            },
-            'Glen Park': {
-                'radius': 8,
-                'x': 12,
-                'y': 10,
-                'x1': -12,
-                'y1': 10,
-            },
-            'Russian Hill': {
-                'radius': 10,
-                'x': 0,
-                'y': 0,
-                'x1': 22,
-                'y1': 1,
-            },
-            'North Beach': {
-                'radius': 10,
-                'x': 0,
-                'y': -2,
-                'x1': 10,
-                'y1': 5,
-            },
-            'Mission': {
-                'radius': 10,
-                'x': -5,
-                'y': 12,
-                'x1': 25,
-                'y1': 10,
-            },
-            'Bernal Heights': {
-                'radius': 10,
-                'x': -20,
-                'y': 5,
-                'x1': 15,
-                'y1': 22,
-            },
-            'Excelsior': {
-                'radius': 10,
-                'x': -18,
-                'y': -7,
-                'x1': 0,
-                'y1': -15,
-            },
-            'Visitacion Valley': {
-                'radius': 10,
-                'x': -10,
-                'y': 0,
-                'x1': 0,
-                'y1': -17,
-            },
-            'Nob Hill': {
-                'radius': 10,
-                'x': -12,
-                'y': -10,
-                'x1': 3,
-                'y1': -12,
-            },
-            'Tenderloin': {
-                'radius': 10,
-                'x': -12,
-                'y': 5,
-                'x1': 8,
-                'y1': -5,
-            },
-            'South of Market': {
-                'radius': 10,
-                'x': -10,
-                'y': 10,
-                'x1': 22,
-                'y1': 17,
-            },
-            'Potrero Hill': {
-                'radius': 10,
-                'x': 0,
-                'y': 0,
-                'x1': 22,
-                'y1': 6,
-            },
-            'Bayview Hunters Point': {
-                'radius': 10,
-                'x': -20,
-                'y': 0,
-                'x1': 15,
-                'y1': 0,
-            },
-            'Financial District/South Beach': {
-                'radius': 10,
-                'x': -5,
-                'y': 5,
-                'x1': 20,
-                'y1': -5,
-            },
-            'Chinatown': {
-                'radius': 6,
-                'x': -2,
-                'y': 2,
-                'x1': -3,
-                'y1': 12,
-            },
-            'Treasure Island': {
-                'radius': 10,
-                'x': -4,
-                'y': -20,
-                'x1': 5,
-                'y1': 8,
-            }
-        };
-        */
 
         var blobDict = {
             'Mission': {
@@ -1124,15 +901,18 @@
                 var incColorFraction = incCount / incMaxLength;
                 var vioColorFraction = vioCount / vioMaxLength;
 
+                var extraOffset = 210;
+
                 svg.append("circle")
                     .attr("class", "blob")
-                    .attr("cx", blob.x)
+                    .attr("cx", blob.x - extraOffset)
                     .attr("cy", blob.y)
                     // .attr("cx", blob.x)
                     // .attr("cy", blob.y)
                     // .attr("r", Math.sqrt(data.length)/5)
                     .attr("r", blob.radius)
                     .style("opacity", 1)
+                    .style("shape-rendering", "cripEdges")
                     .attr("fill", function() { 
                         return incColorScale(incColorFraction)
                     })
@@ -1175,7 +955,7 @@
                     .attr("class", "blob")
                     // .attr("cx", blob.x1)
                     // .attr("cy", blob.y1)
-                    .attr("cx", blob.x1)
+                    .attr("cx", blob.x1 - extraOffset)
                     .attr("cy", blob.y1)
                     .attr("r", blob.radius)
                     .attr("fill", vioColorScale(vioColorFraction))
@@ -1226,11 +1006,11 @@
                 .enter()
                 .append("rect")
                 .attr("x", function(d) {
-                    return 50 + 150 * d;
+                    return -30 + 150 * d;
                 })
-                .attr("y", 25)
+                .attr("y", 5)
                 .attr("width", 10)
-                .attr("height", 30)
+                .attr("height", 15)
                 .attr("fill", function(d) {
                     return incColorScale(d);
                 })
@@ -1239,24 +1019,24 @@
             d3.select("g.colorScale1")
                 .append("text")
                 .style("font-size", "17px")
-                .attr("x", 60)
-                .attr("y", 20)
+                .attr("x", -20)
+                .attr("y", 0)
                 .text("Fire incidents");
 
             // Min label
             d3.select("g.colorScale1")
                 .append("text")
                 .style("font-size", "12px")
-                .attr("x", 60)
-                .attr("y", 50 + 30/2 + 7)
+                .attr("x", -20)
+                .attr("y", 30 + 15/2)
                 .text("Min");
 
             // Max label
             d3.select("g.colorScale1")
                 .append("text")
                 .style("font-size", "12px")
-                .attr("x", 180)
-                .attr("y", 50 + 30/2 + 7)
+                .attr("x", 100)
+                .attr("y", 30 + 15/2)
                 .text("Max");
 
 
@@ -1268,11 +1048,11 @@
                 .enter()
                 .append("rect")
                 .attr("x", function(d) {
-                    return 50 + 150 * d;
+                    return -30 + 150 * d;
                 })
-                .attr("y", 110)
+                .attr("y", 70)
                 .attr("width", 10)
-                .attr("height", 30)
+                .attr("height", 15)
                 .attr("fill", function(d) {
                     return vioColorScale(d);
                 })
@@ -1281,24 +1061,24 @@
             d3.select("g.colorScale2")
                 .append("text")
                 .style("font-size", "17px")
-                .attr("x", 60)
-                .attr("y", 105)
+                .attr("x", -20)
+                .attr("y", 65)
                 .text("Violations");
 
             // Min label
             d3.select("g.colorScale2")
                 .append("text")
                 .style("font-size", "12px")
-                .attr("x", 60)
-                .attr("y", 135 + 30/2 + 7)
+                .attr("x", -20)
+                .attr("y", 95 + 15/2)
                 .text("Min");
 
             // Max label
             d3.select("g.colorScale2")
                 .append("text")
                 .style("font-size", "12px")
-                .attr("x", 180)
-                .attr("y", 135 + 30/2 + 7)
+                .attr("x", 100)
+                .attr("y", 95 + 15/2)
                 .text("Max");
         }
 
@@ -1352,59 +1132,6 @@
                                         .style("opacity", 0);
                                 })
         }
-
-        function updateCirclePositions(districtName,radius) {
-            // if (districtName == 'all') {
-            //     var districtNames = Object.keys(circleDict);
-
-            //     // Set opacity = 1 for all districts
-            //     districtNames.forEach(d => {
-            //         // Finds circles that was maximized and minimizes them.
-            //         if ( d3.selectAll("g.district" + d.replace(/\s/g, '').replace(/\//g, ''))
-            //                 .attr("name") == "shown") {
-            //             var selectedCircles = circleDict[d];
-
-            //             selectedCircles.attr("cx", function(d) {
-            //                 return projection([d.lon, d.lat])[0];
-            //             })
-            //             .attr("cy", function(d) {
-            //                 return projection([d.lon, d.lat])[1];
-            //             })
-            //             .attr("r", circleRadius*radius);
-            //         }
-
-            //         // Sets opacity
-            //         d3.selectAll("g.district" + d.replace(/\s/g, '').replace(/\//g, ''))
-            //         .attr("opacity", 1);
-            //     })
-
-            //     return;
-            // }
-
-            // d3.selectAll("g.district" + districtName.replace(/\s/g, '').replace(/\//g, ''))
-            //     .attr("name", "shown")
-            //     .attr("opacity", 1);
-
-            // var selectedCircles = circleDict[districtName];
-            // // .transition()
-            // // .duration(500)
-            // selectedCircles
-            // .attr("cx", function(d) {
-            //     return projection([d.lon, d.lat])[0];
-            // })
-            // .attr("cy", function(d) {
-            //     return projection([d.lon, d.lat])[1];
-            // })
-            // .attr("r", circleRadius*radius);
-
-            // var districtNames = Object.keys(circleDict);
-            // districtNames.forEach(d => {
-            //     if (d != districtName) {
-            //         d3.selectAll("g.district" + d.replace(/\s/g, '').replace(/\//g, ''))
-            //         .attr("opacity", 0);
-            //     }
-            // })
-        }
     
         var yScaleBar, xScaleBar;
         const yPaddingForTitle = 30; // To make room for title
@@ -1456,8 +1183,8 @@
 
             // Title label
             svgHourBar.append("text")
-                        .attr("class", "hourBarTitle")
-                        .attr("x", 0 + wBar/2 + 20)
+                        .attr("class", "barChartTitle")
+                        .attr("x", 0 + wBar/2 + 15)
                         .attr("y", 10)
                         .attr("dy", "1em")
                         .text("All districts");
@@ -1521,6 +1248,7 @@
         }
 
         var yScaleViolationBar, xScaleViolationBar;
+        var yDistanceFromHourChart = 250;
         var xDistanceFromHourChart = 550;
 
         var explainerTexts = {
@@ -1582,20 +1310,20 @@
             //Create X axis
             svgHourBar.append("g")
                 .attr("class", "axis-x")
-                .attr("transform", "translate(" + (xDistanceFromHourChart+margin.left) + "," + (hBar+margin.top+yPaddingForTitle) + ")")
+                .attr("transform", "translate(" + (margin.left) + "," + (2*yDistanceFromHourChart+ hBar+margin.top+yPaddingForTitle) + ")")
                 .call(d3.axisBottom(xScaleViolationBar));
             
             //Create Y axis
             svgHourBar.append("g")
                 .attr("class", "axis-y-vio")
-                .attr("transform", "translate(" + (xDistanceFromHourChart+margin.left) + "," + (margin.top+yPaddingForTitle) + ")")
+                .attr("transform", "translate(" + (margin.left) + "," + (2*yDistanceFromHourChart+margin.top+yPaddingForTitle) + ")")
                 .call(d3.axisLeft(yScaleViolationBar));
 
             // Title label
             svgHourBar.append("text")
-                        .attr("class", "violationBarTitle")
-                        .attr("x", xDistanceFromHourChart + wBar/2 + 20)
-                        .attr("y", 10)
+                        .attr("class", "barChartTitle")
+                        .attr("x",  wBar/2 + 15)
+                        .attr("y", 2*yDistanceFromHourChart+10)
                         .attr("dy", "1em")
                         .text("All districts");
 
@@ -1603,16 +1331,16 @@
             svgHourBar.append("text")
                     .attr("class", "legendText")
                     .attr("transform",
-                            "translate(" + (xDistanceFromHourChart+(wBar/2)+margin.left/2 - 10) + "," + 
-                                        (hBar+35+margin.top+yPaddingForTitle) + ")")
+                            "translate(" + ((wBar/2)+margin.left/2 - 15) + "," + 
+                                        (2*yDistanceFromHourChart+hBar+35+margin.top+yPaddingForTitle) + ")")
                     .text("Type of violation");
 
             // Y-Label
             svgHourBar.append("text")
                 .attr("class", "legendText")
                 .attr("transform", "rotate(-90)")
-                .attr("y", 0 + xDistanceFromHourChart - 5)
-                .attr("x", 0 - (hBar / 2) - 70 - yPaddingForTitle) 
+                .attr("y", 0 - 5)
+                .attr("x", 0 - 3*yDistanceFromHourChart + (hBar / 2) - yPaddingForTitle + 25) 
                 .attr("dy", "1em")
                 .text("# of violations"); 
 
@@ -1623,7 +1351,7 @@
                     .enter()
                     .append("rect")
                     .attr("class", "vioData")
-                    .attr("transform", "translate(" + (xDistanceFromHourChart+margin.left) + ","+ margin.top +")")
+                    .attr("transform", "translate(" + (margin.left) + ","+ (2*yDistanceFromHourChart + margin.top) +")")
                     .attr("x", function(d,i) {
                         return xScaleViolationBar(d.key);
                     })
@@ -1658,7 +1386,6 @@
         }
 
         var yScaleFireTypeBar, xScaleFireTypeBar;
-        var yDistanceFromHourChart = 250;
         var explainerTextsTypes = {
             'OUT': 'Outdoor fires in trash, rubbish, etc.',
             'COK': 'Cooking fire, contained to container',
@@ -1721,8 +1448,8 @@
 
             // Title label
             svgHourBar.append("text")
-                        .attr("class", "violationBarTitle")
-                        .attr("x", wBar/2 + 20)
+                        .attr("class", "barChartTitle")
+                        .attr("x", wBar/2 + 15)
                         .attr("y", yDistanceFromHourChart + 10)
                         .attr("dy", "1em")
                         .text("All districts");
@@ -1731,18 +1458,18 @@
             svgHourBar.append("text")
                     .attr("class", "legendText")
                     .attr("transform",
-                            "translate(" + ((wBar/2)+margin.left/2 - 10) + "," + 
+                            "translate(" + ((wBar/2)+margin.left/2) + "," + 
                                         (yDistanceFromHourChart+hBar+35+margin.top+yPaddingForTitle) + ")")
-                    .text("Type of violation");
+                    .text("Type of fire");
 
             // Y-Label
             svgHourBar.append("text")
                 .attr("class", "legendText")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 0 - 5)
-                .attr("x", 0 - yDistanceFromHourChart - (hBar / 2) - 70 - yPaddingForTitle) 
+                .attr("x", 0 - yDistanceFromHourChart - (hBar / 2) - 50 - yPaddingForTitle) 
                 .attr("dy", "1em")
-                .text("# of violations"); 
+                .text("# of fires"); 
 
 
             bars = svgHourBar.append("g")
@@ -1785,17 +1512,36 @@
                     });
         }
 
+
         var paddingLeft = 30;
         var titlePadding = 50;
         // set the ranges
-        var x = d3.scaleTime().range([0, w-300]);
+        var x = d3.scaleTime().range([0, w-100]);
         var y = d3.scaleLinear().range([hBar, 0]);
+
+        var x2 = d3.scaleTime().range([0, w-100]);
+        var y2 = d3.scaleLinear().range([hBar/3, 0]);
+
+        // Axes
+        var xAxis = d3.axisBottom(x);
 
         // define the line
         var valueline = d3.line()
                             .x(function(d) { return x( d.key); })
                             .y(function(d) { 
                                 return y(d.values.length); });
+
+        var clip = svgLineChart.append("defs").append("svg:clipPath")
+                                .attr("id", "clip")
+                                .append("svg:rect")
+                                .attr("width", w - 100)
+                                .attr("height", hBar + yPaddingForTitle + 100)
+                                .attr("x", 0)
+                                .attr("y", 0); 
+
+        var brushTime = d3.brushX()
+                              .extent([[0,0], [w-100, hBar/3]])
+                              .on("brush", brushedTime);
 
         function createLineChart(data) {
 
@@ -1848,35 +1594,47 @@
 
 
 
-            
-
-
             x.domain(d3.extent(sortViolations, function(d) { 
                 return d.key; }));
             y.domain([0, d3.max(sortViolations, function(d) {
                 return d.values.length; })]);
             
-
+            x2.domain(x.domain());
+            y2.domain(y.domain());
 
             svgLineChart.append("path")
                 .data([sortIncidents])
                 .attr("class", "lineDataIncidents")
-                .attr("stroke", "teal")
+                .attr("stroke", "red")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
+                .attr("clip-path", "url(#clip)")
                 .attr("d", valueline);
 
             svgLineChart.append("path")
                 .data([sortViolations])
                 .attr("class", "lineDataViolations")
-                .attr("stroke", "red")
+                .attr("stroke", "teal")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
+                .attr("clip-path", "url(#clip)")
                 .attr("d", valueline);
 
             // Add the X Axis
             svgLineChart.append("g")
                 .attr("class","x-axis-line")
                 .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (hBar+titlePadding) + ")")
-                .call(d3.axisBottom(x));
+                .call(xAxis);
+
+            // Add the time X Axis
+            svgLineChart.append("g")
+                        .attr("class", "x-axis-line-time")
+                        .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (1.85*hBar+titlePadding) + ")")
+                        .call(d3.axisBottom(x2));
+
+            svgLineChart.append("g")
+                        .attr("class", "brushTime")
+                        .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (2*hBar - 24) + ")")
+                        .call(brushTime)
+                        .call(brushTime.move, x.range());
 
             // Add the Y Axis
             svgLineChart.append("g")
@@ -1887,7 +1645,7 @@
             // Title label
             svgLineChart.append("text")
                 .attr("class", "LineChartTitle")
-                .attr("x", w/2 - 175)
+                .attr("x", w/2 - 100)
                 .attr("y",  0)
                 .attr("dy", "1em")
                 .text("Violations and Incidents over time");
@@ -1895,7 +1653,7 @@
             // X-Label
             svgLineChart.append("text")
                 .attr("class", "legendText")
-                .attr("x", w/2 - 100)
+                .attr("x", w/2)
                 .attr("y",  hBar + 50+titlePadding)
                 .text("Date");
 
@@ -1939,6 +1697,15 @@
                 .attr("fill", "teal");
 
             }
+
+        function brushedTime() {
+            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+            var s = d3.event.selection || x2.range();
+            x.domain(s.map(x2.invert, x2));
+            svgLineChart.select("path.lineDataIncidents").attr("d", valueline);
+            svgLineChart.select("path.lineDataViolations").attr("d", valueline);
+            svgLineChart.select("g.x-axis-line").call(xAxis);
+        }
 
         function brushed() {
             if (d3.event.selection != null) {
@@ -2126,7 +1893,7 @@
                     .duration(250)
                     .ease(d3.easeLinear)
                     .attr("class","vioData")
-                    .attr("transform", "translate(" + (xDistanceFromHourChart+margin.left) + ","+ margin.top +")")
+                    .attr("transform", "translate(" + (margin.left) + ","+ (2*yDistanceFromHourChart +margin.top) +")")
                     .attr("x",function(d,i) {
                         return xScaleViolationBar(d.key);
                     })
@@ -2286,9 +2053,6 @@
                     .attr("class","lineDataViolations")
                     .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                     .attr("d", valueline);
-
-        
-
 
         }
 
