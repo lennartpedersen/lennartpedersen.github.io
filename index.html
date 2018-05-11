@@ -152,8 +152,8 @@
 
       <div class="container">
           <p>
-            The city of San Francisco is the home of a lot of fiery incidents! From XXXX to 2018 there has been 
-            recorded more than XX,XXX incidents of fire. Fires happen for a lot of different reasons - cooking fires,
+            The city of San Francisco is the home of a lot of fiery incidents! From 2005 to 2018 there has been 
+            recorded more than 45,000 incidents of fire. Fires happen for a lot of different reasons - cooking fires,
             building fires, vehicle and general outdoor fires are among the first things we think about when thinking about fires.
             And San Francisco are no stranger to these types of fires. </br></br>
 
@@ -187,12 +187,12 @@
             <h1 class="sectionHeader">The history of fires in SF</h1>
             <p>There is data in our line chart</p>
             <p>
-                Looking at the line chart below one particular time of year seem to spark more fires than others – christmas.
-                Every year from the start of the holiday season until a week after new years, the number of fires have a pretty solid
-                upwards trend. One of the major fire hazards around this holiday is of course christmas trees and christmas decoration. 
+                Looking at the line chart below one particular time of year seem to be missing some fires – christmas.
+                Every year from the start of the holiday season until a week after christmas eve, there are no datapoints. This is a bit of 
+                a flaw in the data as there of course are fires during that period. 
                 Actually, according to the National Fire Protection Association (NFPA) 
                 the christmas season causes an average of ~1100 building fires and dozens of civilian injuries and deaths every year 
-                across the US, because of said fire hazards<sup>1</sup>.
+                across the US, because of christmas trees and christmas decoration<sup>1</sup>.
             </p>
             <p>
                 The end of the month of October is Halloween in the US and is celebrated across the country. Also during this holiday we can find 
@@ -1288,9 +1288,10 @@
                     .attr("height", function(d){
                         return hBar-yScaleBar(d.values.length);
                     })
+                    .attr("fill", "crimson")
                     .on("mouseover", function(d){
                         d3.select(this)
-                            .attr("fill","grey");
+                            .attr("fill","red");
 
                         // Tooltip
                         div.transition()		
@@ -1303,7 +1304,7 @@
                     })
                     .on("mouseout", function(d) {
                         d3.select(this)
-                            .attr("fill", "black");
+                            .attr("fill", "crimson");
 
                         div.transition()		
                             .duration(500)		
@@ -1426,9 +1427,10 @@
                     .attr("height", function(d){
                         return hBar-yScaleViolationBar(d.values.length);
                     })
+                    .attr("fill", "darkkhaki")
                     .on("mouseover", function(d) {
                         d3.select(this)
-                            .attr("fill", "grey");
+                            .attr("fill", "khaki");
 
                         // Tooltip
                         div.transition()		
@@ -1441,7 +1443,7 @@
                     })
                     .on("mouseout", function(d) {
                         d3.select(this)
-                            .attr("fill", "black");
+                            .attr("fill", "darkkhaki");
 
                         div.transition()		
                             .duration(500)		
@@ -1553,9 +1555,10 @@
                     .attr("height", function(d){
                         return hBar-yScaleFireTypeBar(d.values.length);
                     })
+                    .attr("fill", "darkorange")
                     .on("mouseover", function(d) {
                         d3.select(this)
-                            .attr("fill", "grey");
+                            .attr("fill", "orange");
 
                         // Tooltip
                         div.transition()		
@@ -1568,7 +1571,7 @@
                     })
                     .on("mouseout", function(d) {
                         d3.select(this)
-                            .attr("fill", "black");
+                            .attr("fill", "darkorange");
 
                         div.transition()		
                             .duration(500)		
@@ -1631,22 +1634,66 @@
                 })
                 .entries(tempViolations);            
 
+
+            dates = {}
+
             var sortIncidents = filteredIncidents;
             sortIncidents.forEach(function(d) {
                 d.key = new Date(d.key);
+
+                dates[d.key] = d.values;
             })
 
-             sortIncidents.sort(function(a,b){
+            var allData = [];
+            var allDates = getDates(new Date("1/3/2005"), new Date("4/20/2018"))
+            allDates.forEach(d => {
+                d = new Date(d.key);
+                if (dates[d] != undefined) {
+                    allData.push({
+                        key: d,
+                        values: dates[d]
+                    })
+                } else {
+                    allData.push({
+                        key: d,
+                        values: []
+                    })
+                }
+            })
+
+            sortIncidents = allData;
+            sortIncidents.sort(function(a,b){
                 // Turn your strings into dates, and then subtract them
                 // to get a value that is either negative, positive, or zero.
                 return new Date(b.key) - new Date(a.key);
             });
 
+
+            dates = {}
             var sortViolations = filteredViolations;
             sortViolations.forEach(function(d) {
                 d.key = new Date(d.key);
+
+                dates[d.key] = d.values;
             })
             
+            allData = [];
+            allDates.forEach(d => {
+                d = new Date(d.key);
+                if (dates[d] != undefined) {
+                    allData.push({
+                        key: d,
+                        values: dates[d]
+                    })
+                } else {
+                    allData.push({
+                        key: d,
+                        values: []
+                    })
+                }
+            })
+
+            sortViolations = allData;
  
             sortViolations.sort(function(a,b){
                 // Turn your strings into dates, and then subtract them
@@ -1678,10 +1725,7 @@
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("clip-path", "url(#clip)")
                 .attr("d", valueline)
-                .style("opacity", 1)
-                .on("mouseover", function(d, i) {
-                    console.log(d)
-                });
+                .style("opacity", 1);
                 
 
             var violationSpikes = [];
@@ -1731,7 +1775,6 @@
                         .append("circle")
                         .attr("class", "dot")
                         .attr("cx", function(d) {
-                            console.log(d);
                             return x(d.key) + 80;
                         })
                         .attr("cy", function(d) {
@@ -1848,9 +1891,11 @@
                     var currentOp = svgLineChart.select("path.lineDataViolations").style("opacity");
                     if (currentOp == 1) {
                         svgLineChart.select("path.lineDataViolations").style("opacity", 0);
+                        svgLineChart.selectAll("circle.dot").style("opacity", 0);
                         svgLineChart.select("circle.legendV").attr("fill", "gray");
                     } else {
                         svgLineChart.select("path.lineDataViolations").style("opacity", 1);
+                        svgLineChart.selectAll("circle.dot").style("opacity", 1);
                         svgLineChart.select("circle.legendV").attr("fill", "teal");
                     }
                 })
@@ -1874,6 +1919,27 @@
                 .attr("fill", "teal");
 
             }
+
+
+        Date.prototype.addDays = function(days) {
+        var date = new Date(this.valueOf());
+        date.setDate(date.getDate() + days);
+            return date;
+        }
+
+        function getDates(startDate, stopDate) {
+            var dateArray = new Array();
+            var currentDate = startDate;
+            while (currentDate <= stopDate) {
+                d = {
+                    key: new Date (currentDate),
+                    values: []
+                }
+                dateArray.push(d);
+                currentDate = currentDate.addDays(1);
+            }
+            return dateArray;
+        }
 
         function brushedTime() {
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
@@ -2019,8 +2085,7 @@
                     .attr("width", xScaleFireTypeBar.bandwidth()-1)
                     .attr("height",function(d){
                         return hBar-yScaleFireTypeBar(d.values.length);
-                    })
-                    .attr("fill","black");
+                    });
         }
 
         function updateViolationTypeBarChartValues(newValues) {
@@ -2092,8 +2157,7 @@
                     .attr("width",xScaleViolationBar.bandwidth()-1)
                     .attr("height",function(d){
                         return hBar-yScaleViolationBar(d.values.length);
-                    })
-                    .attr("fill","black");
+                    });
         }
 
         function updateHourBarChartValues(newValues) {
@@ -2161,8 +2225,7 @@
                     .attr("width",xScaleBar.bandwidth()-1)
                     .attr("height",function(d){
                         return hBar-yScaleBar(d.values.length);
-                    })
-                    .attr("fill","black");
+                    });
         }
 
         function updateLineChartValues(data) {
