@@ -1710,18 +1710,18 @@
             y2.domain(y.domain());
 
             svgLineChart.append("path")
-                .data([sortIncidents])
-                .attr("class", "lineDataIncidents")
-                .attr("stroke", "red")
+                .data([sortViolations])
+                .attr("class", "lineDataViolations")
+                .attr("stroke", "teal")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("clip-path", "url(#clip)")
                 .attr("d", valueline)
                 .style("opacity", 1);
 
             svgLineChart.append("path")
-                .data([sortViolations])
-                .attr("class", "lineDataViolations")
-                .attr("stroke", "teal")
+                .data([sortIncidents])
+                .attr("class", "lineDataIncidents")
+                .attr("stroke", "red")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("clip-path", "url(#clip)")
                 .attr("d", valueline)
