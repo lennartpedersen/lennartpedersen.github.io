@@ -73,12 +73,12 @@
 
         div.mapDiv {
             width: 55%;
-            height: 1000px;
+            height: 800px;
             float: left;
         }
 
         div.chartDiv {
-            height: 1000px;
+            height: 800px;
         }
 
         div.linechart {
@@ -181,11 +181,15 @@
 
           <div class="linechart">
             <p>
-                It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco.
+                Out of the ~45,000 fires, roughly 30,000 or one third are related to outdoor or cooking fires. The outdoor type may be to broad to interpret
+                in relation to which violations could lead to those types of fires.
+            </p>
+            <p>
+                It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco. It would also seem
+                that a lot of the fires in these areas are related to cooking fires.
             </p>
   
             <h1 class="sectionHeader">The history of fires in SF</h1>
-            <p>There is data in our line chart</p>
             <p>
                 Looking at the line chart below one particular time of year seem to be missing some fires – christmas.
                 Every year from the start of the holiday season until a week after christmas eve, there are no datapoints. This is a bit of 
@@ -195,7 +199,7 @@
                 across the US, because of christmas trees and christmas decoration<sup>1</sup>.
             </p>
             <p>
-                The end of the month of October is Halloween in the US and is celebrated across the country. Also during this holiday we can find 
+                The end of the month of October is Halloween in the US and is celebrated across the country. During this holiday we can find 
                 spikes in the number of fire incidents, especially in the years 2013, 2014 and 2016 we can tell that there is considerably more fires
                 than in the months preceding October. </br>
                 The NFPA reports of an average of ~860 home structure fires per year from 2009-2013 across the US, as well as 40+ civilian injuries
@@ -1249,7 +1253,7 @@
             svgHourBar.append("text")
                         .attr("class", "barChartTitle")
                         .attr("x", 0 + wBar/2 + 15)
-                        .attr("y", 10)
+                        .attr("y", 0)
                         .attr("dy", "1em")
                         .text("All districts");
 
@@ -1265,7 +1269,7 @@
             svgHourBar.append("text")
                 .attr("class", "legendText")
                 .attr("transform", "rotate(-90)")
-                .attr("y", 0)
+                .attr("y", -5)
                 .attr("x", 0 - (hBar / 2) - 70 - yPaddingForTitle)
                 .attr("dy", "1em")
                 .text("# of fire incidents"); 
@@ -1437,7 +1441,7 @@
                             .duration(200)		
                             .style("opacity", .9);
 
-                        div.html("<b>" + d.key + "</b></br>" + explainerTexts[d.key])	
+                        div.html("<b>" + d.key + "</b></br>Incidents: "+ d.values.length + "</br>" + explainerTexts[d.key])	
                             .style("left", (d3.event.pageX) + "px")		
                             .style("top", (d3.event.pageY - 28) + "px");
                     })
@@ -1565,7 +1569,7 @@
                             .duration(200)		
                             .style("opacity", .9);
 
-                        div.html("Incidents: " + d.values.length + "</br>" + explainerTextsTypes[d.key])
+                        div.html("<b>"+d.key+"</b></br>"+"Incidents: " + d.values.length + "</br>" + explainerTextsTypes[d.key])
                             .style("left", (d3.event.pageX) + "px")		
                             .style("top", (d3.event.pageY - 28) + "px");
                     })
@@ -1858,7 +1862,7 @@
                 .attr("class", "legendText")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 5)
-                .attr("x", 0 - (hBar / 2) -130) 
+                .attr("x", 0 - (hBar / 2) -210) 
                 .attr("dy", "1em")
                 .text("# of violations and incidents"); 
 
