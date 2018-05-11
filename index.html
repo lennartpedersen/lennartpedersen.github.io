@@ -30,6 +30,13 @@
             margin-left: 10%;
         }
 
+        h2.refs {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            text-align: left;
+            opacity: 0;
+            margin-left: 10%;
+        }
+
         text {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         }
@@ -75,7 +82,7 @@
         }
 
         div.linechart {
-            height: 500px;
+            height: 1500px;
             width: auto;
 
             bottom: 0;
@@ -84,6 +91,13 @@
             right: 0;
 
             /* margin: auto; */
+        }
+
+        div.references {
+            height: auto;
+            width: auto;
+            
+            margin: 25px;
         }
 
         rect.selection {
@@ -170,9 +184,64 @@
                 It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco.
             </p>
   
-            <h1 class="sectionHeader">Has it always been this way?</h1>
+            <h1 class="sectionHeader">The history of fires in SF</h1>
             <p>There is data in our line chart</p>
-        </div>
+            <p>
+                Looking at the line chart below one particular time of year seem to spark more fires than others – christmas.
+                Every year from the start of the holiday season until a week after new years, the number of fires have a pretty solid
+                upwards trend. One of the major fire hazards around this holiday is of course christmas trees and christmas decoration. 
+                Actually, according to the National Fire Protection Association (NFPA) 
+                the christmas season causes an average of ~1100 building fires and dozens of civilian injuries and deaths every year 
+                across the US, because of said fire hazards<sup>1</sup>.
+            </p>
+            <p>
+                The end of the month of October is Halloween in the US and is celebrated across the country. Also during this holiday we can find 
+                spikes in the number of fire incidents, especially in the years 2013, 2014 and 2016 we can tell that there is considerably more fires
+                than in the months preceding October. </br>
+                The NFPA reports of an average of ~860 home structure fires per year from 2009-2013 across the US, as well as 40+ civilian injuries
+                and millions in property damage<sup>2</sup>. </br>
+                Something quite ironic about this stat is that October is the official Fire Prevention Month in the US<sup>3</sup>.
+            </p>
+            <p>
+                The 4th of July is also widely celebrated in the US. The day celebrates the independence of the United States from the british, and
+                is usually celebrated with a lot of fireworks. </br>
+                Again, using some zoom and looking at the chart we can clearly see that on the 4th of July every year there is a peak in the number of fires
+                with the biggest peak in 2017.
+            </p>
+            <p>
+                For now enough about fires. </br></br>
+                When looking at the chart the first thing that pops out is the huge spikes in number of violations, which has some interesting patterns.
+                The first pattern is the spikes happening about every 5 years around christmas/new years, marked with circles on the chart.
+                These spikes occur because of the policy enforced by the San Francisco Fire Department (SFFD), whom conducts inspections
+                on weekly, monthly, annual and semi-annual basis depending on the inspection type. Every fifth year there are certificates
+                permits and equipment certification that expires<sup>4</sup> and this is why there are spikes like these.
+            </p>
+            <p>
+                The second pattern we can observe is quite recent – mid 2016 to now. In 2015 a new version of the International Fire Code (IFC) was released with
+                significant changes and in July 2016 the state of California updated their Fire Code with adoptions from IFC 2015.
+                This brought major changes in standards regard number of exits, doors, gates and turnstiles, sprinkler systems, fire alarms, etc.<sup>5</sup>
+            </p>
+
+           </div>
+
+           <div class="references">
+               <h2 class="refs">References</h3>
+               <p>
+                   <sup>1</sup> <a href="https://www.nfpa.org/News-and-Research/Fire-statistics-and-reports/Fire-statistics/Fire-causes/Holiday/Christmas-tree-and-holiday-lights">https://www.nfpa.org/News-and-Research/Fire-statistics-and-reports/Fire-statistics/Fire-causes/Holiday/Christmas-tree-and-holiday-lights</a>
+               </p>
+               <p>
+                   <sup>2</sup> <a href="https://www.nfpa.org/Public-Education/By-topic/Seasonal-fires/Halloween-safety">https://www.nfpa.org/Public-Education/By-topic/Seasonal-fires/Halloween-safety</a>
+               </p>
+               <p>
+                   <sup>3</sup> <a href="https://www.fema.gov/news-release/2006/10/16/october-national-fire-prevention-month">https://www.fema.gov/news-release/2006/10/16/october-national-fire-prevention-month</a>
+               </p>
+               <p>
+                   <sup>4</sup> <a href="https://sf-fire.org/inspections">https://sf-fire.org/inspections</a>
+               </p>
+               <p>
+                   <sup>5</sup> <a href="https://up.codes/viewer/california/ca-fire-code-2016">https://up.codes/viewer/california/ca-fire-code-2016</a>
+               </p>
+           </div>
       </div>
 
       
@@ -188,9 +257,8 @@
         }
 
         function showTitleAndText() {
-            d3.select("h1.title").style("opacity", 1);
-            d3.select("h1.pageTitle").style("opacity", 1);
-            d3.select("h1.sectionHeader").style("opacity", 1);
+            d3.selectAll("h1").style("opacity", 1);
+            d3.selectAll("h2").style("opacity", 1);
             d3.selectAll("p").style("opacity", 1);
 
             d3.select("div.container")
@@ -251,7 +319,7 @@
         var circleDict = {}; // Key: District name, Value: <circle> elements
         var coords;
 
-        var yearLimit = 2013;
+        var yearLimit = 2000;
 
         d3.csv("JustFires_New.csv", function(data) {
             coords = [];
@@ -1513,7 +1581,7 @@
         var titlePadding = 50;
         // set the ranges
         var x = d3.scaleTime().range([0, w-100]);
-        var y = d3.scaleLinear().range([hBar, 0]);
+        var y = d3.scaleLinear().range([hBar*2, 0]);
 
         var x2 = d3.scaleTime().range([0, w-100]);
         var y2 = d3.scaleLinear().range([hBar/3, 0]);
@@ -1531,9 +1599,9 @@
                                 .attr("id", "clip")
                                 .append("svg:rect")
                                 .attr("width", w - 100)
-                                .attr("height", hBar + yPaddingForTitle + 100)
+                                .attr("height", hBar*1.5 + yPaddingForTitle + 100)
                                 .attr("x", 0)
-                                .attr("y", 0); 
+                                .attr("y", -10); 
 
         var brushTime = d3.brushX()
                               .extent([[0,0], [w-100, hBar/3]])
@@ -1600,7 +1668,8 @@
                 .attr("stroke", "red")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("clip-path", "url(#clip)")
-                .attr("d", valueline);
+                .attr("d", valueline)
+                .style("opacity", 1);
 
             svgLineChart.append("path")
                 .data([sortViolations])
@@ -1608,23 +1677,105 @@
                 .attr("stroke", "teal")
                 .attr("transform", "translate(" + (margin.left+paddingLeft) + ","+titlePadding +")")
                 .attr("clip-path", "url(#clip)")
-                .attr("d", valueline);
+                .attr("d", valueline)
+                .style("opacity", 1)
+                .on("mouseover", function(d, i) {
+                    console.log(d)
+                });
+                
+
+            var violationSpikes = [];
+            sortViolations.forEach(d => {
+                var numberOfViolations = d.values.length;
+                var date = d.key;
+                var month = date.getMonth() + 1;
+                
+                if (numberOfViolations >= 62 && (month == 1 || month == 9 || month == 11) ) {
+                    var vd = {}
+                    d.values.forEach(dd => {
+                        vd[dd.violation] = (vd[dd.violation] == undefined) ? 0 : vd[dd.violation] + 1;
+                    })
+
+                    console.log(vd)
+                    // Create items array
+                    var items = Object.keys(vd).map(function(key) {
+                        return [key, vd[key]];
+                    });
+
+                    // Sort the array based on the second element
+                    items.sort(function(first, second) {
+                        return second[1] - first[1];
+                    });
+
+                    // Create a new array with only the first 5 items
+                    var top5 = items.slice(0, 5);
+
+                    var s = ""
+                    top5.forEach(d => {
+                        s += "Violation type: " + d[0] + ", Occurences: " + d[1] + "</br>Description: " + explainerTexts[d[0]] + "</br></br>"
+                    })
+
+                    var item = {
+                        key: date,
+                        values: d.values,
+                        s: s
+                    };
+
+                    violationSpikes.push(item);
+                }
+            })
+
+            svgLineChart.selectAll("dot")
+                        .data(violationSpikes)
+                        .enter()
+                        .append("circle")
+                        .attr("class", "dot")
+                        .attr("cx", function(d) {
+                            console.log(d);
+                            return x(d.key) + 80;
+                        })
+                        .attr("cy", function(d) {
+                            return y(d.values.length) + 50
+                        })
+                        .attr("r", 3)
+                        .style("fill", "white")
+                        .style("stroke", "teal")
+                        .style("stroke-width", 1)
+                        .style("cursor", "pointer")
+                        .style("opacity", 1)
+                        .on("mouseover", function(d) {
+                            if (d3.select(this).style("opacity") > 0.5) {
+                                div.transition()		
+                                    .duration(200)		
+                                    .style("opacity", .9);
+
+                                div.html(d.s)	
+                                    .style("left", (d3.event.pageX) + "px")		
+                                    .style("top", (d3.event.pageY - 28) + "px");
+                            }
+                        })
+                        .on("mouseout", function(d) {
+                            div.transition()		
+                                .duration(500)		
+                                .style("opacity", 0);
+                        });
 
             // Add the X Axis
             svgLineChart.append("g")
                 .attr("class","x-axis-line")
-                .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (hBar+titlePadding) + ")")
+                .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (2*hBar+titlePadding) + ")")
                 .call(xAxis);
 
             // Add the time X Axis
             svgLineChart.append("g")
                         .attr("class", "x-axis-line-time")
-                        .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (1.85*hBar+titlePadding) + ")")
+                        .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (2.85*hBar+titlePadding) + ")")
                         .call(d3.axisBottom(x2));
 
+            // Timeline brush
             svgLineChart.append("g")
                         .attr("class", "brushTime")
-                        .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (2*hBar - 24) + ")")
+                        .attr("transform", "translate("+(margin.left+paddingLeft) + "," + (3*hBar - 24) + ")")
                         .call(brushTime)
                         .call(brushTime.move, x.range());
 
@@ -1636,17 +1787,27 @@
 
             // Title label
             svgLineChart.append("text")
-                .attr("class", "LineChartTitle")
+                .attr("class", "barChartTitle")
                 .attr("x", w/2 - 100)
-                .attr("y",  0)
+                .attr("y",  -5)
                 .attr("dy", "1em")
                 .text("Violations and Incidents over time");
+
+            // Subtitle label
+            svgLineChart.append("text")
+                .attr("class", "barChartTitle")
+                .attr("x", w/2 - 200)
+                .attr("y",  15)
+                .attr("dy", "1em")
+                .style("font-size", "12px")
+                .style("fill", "darkgray")
+                .text("Click the legend to hide/show incidents or violations. Zoom in on the data using the brush below.");
 
             // X-Label
             svgLineChart.append("text")
                 .attr("class", "legendText")
                 .attr("x", w/2)
-                .attr("y",  hBar + 50+titlePadding)
+                .attr("y",  2*hBar + 50+titlePadding - 20)
                 .text("Date");
 
             // Y-Label
@@ -1665,6 +1826,17 @@
             svgLineChart.append("text")
                 .attr("x", margin.left+80)
                 .attr("y", 10+titlePadding)
+                .on("click", function() {
+                    var currentOp = svgLineChart.select("path.lineDataIncidents").style("opacity");
+                    if (currentOp == 1) {
+                        svgLineChart.select("path.lineDataIncidents").style("opacity", 0);
+                        svgLineChart.select("circle.legendI").attr("fill", "gray");
+                    } else {
+                        svgLineChart.select("path.lineDataIncidents").style("opacity", 1);
+                        svgLineChart.select("circle.legendI").attr("fill", "red");
+                    }
+                })
+                .style("cursor", "pointer")
                 .text(function(d) {
                     return names[0];
                 });
@@ -1672,17 +1844,30 @@
             svgLineChart.append("text")
                 .attr("x", margin.left+80)
                 .attr("y", 30+titlePadding)
+                .on("click", function() {
+                    var currentOp = svgLineChart.select("path.lineDataViolations").style("opacity");
+                    if (currentOp == 1) {
+                        svgLineChart.select("path.lineDataViolations").style("opacity", 0);
+                        svgLineChart.select("circle.legendV").attr("fill", "gray");
+                    } else {
+                        svgLineChart.select("path.lineDataViolations").style("opacity", 1);
+                        svgLineChart.select("circle.legendV").attr("fill", "teal");
+                    }
+                })
+                .style("cursor", "pointer")
                 .text(function(d) {
                     return names[1];
                 });
 
             svgLineChart.append("circle")
+                .attr("class", "legendI")
                 .attr("cx", margin.left+70)
                 .attr("cy", 5+titlePadding)
                 .attr("r", 5)
                 .attr("fill", "red");
             
             svgLineChart.append("circle")
+                .attr("class", "legendV")
                 .attr("cx", margin.left+70)
                 .attr("cy", 25+titlePadding)
                 .attr("r", 5)
@@ -1697,6 +1882,18 @@
             svgLineChart.select("path.lineDataIncidents").attr("d", valueline);
             svgLineChart.select("path.lineDataViolations").attr("d", valueline);
             svgLineChart.select("g.x-axis-line").call(xAxis);
+
+            svgLineChart.selectAll("circle.dot")
+                        .attr("cx", function(d) {
+                            return x(d.key) + 80;
+                        })
+                        .style("opacity", function(d) {
+                            if (x(d.key) < 1) {
+                                return 0;
+                            } else {
+                                return 1;
+                            }
+                        });
         }
 
         function brushed() {
