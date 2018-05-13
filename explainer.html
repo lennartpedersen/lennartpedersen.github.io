@@ -5,35 +5,227 @@
       <title>Explainer page</title>
 
       <style>
+          body {
+              margin-left: 20%;
+              margin-right: 20%;
+              font-family: Calibri, 'Trebuchet MS', sans-serif
+          }
+
+          p.Q {
+              font-weight: bold;
+          }
       </style>
   </head>
   <body>
+      <h1 style="text-align: center;">Explainer page</h1>
         <h2>Motivation</h2>
-            <p>What is your dataset?</p>
+            <p class="Q">What is your dataset?</p>
+            <p>
+                The datasets we have used are two different datasets about fires in San Francisco. 
+                One dataset containing information about Fire Incidents - so every time a fire has been 
+                reported. And one dataset containing violations of laws regarding fire. 
+            </p>
             
-            <p>Why did you choose this/these particular dataset(s)?</p>
+            <p class="Q">Why did you choose this/these particular dataset(s)?</p>
+            <p>
+                We thought that it was interesting to learn something about fires, where they happen and why they happen. 
+                Both in regards to seeing which areas are the safest to live in, but also if we could discover something more general 
+                about fires in major cities. This knowledge could potentially be very beneficial for Fire Departments and Governments so that 
+                they could easilier prevent fires from happening. We chose these particular datasets about fire because we thought that they were 
+                the most interesting ones available. We started from a hypothesis saying that there would be some correlation between the number 
+                of incidents and the number of violations. Assuming that the areas which has a high number of incidents are also the ones that has 
+                a high number of violations. 
+            </p>
             
-            <p>What was your goal for the end user’s experience?</p>
+            <p class="Q">What was your goal for the end user’s experience?</p>
+            <p>
+                The goal for the end user is to show them the different type of fires that occur in San Francisco and the types of violations 
+                that are commited. </br>
+                The end user should be able to quickly get an overview over what is happening where, e.g. which district in SF has the most 
+                incidents of fire and which has the most recorded violations. Then the reader should be able to explore the 
+                individual fires/violations as well as seeing which type is the most frequent and thus conclude, on their own, if there is a 
+                correlation between different types of fires and violations.
+            </p>
         
         <h2>Basic stats. Let’s understand the dataset better</h2>
-            <p>Write about your choices in data cleaning and preprocessing</p>
+            <p class="Q">Write about your choices in data cleaning and preprocessing</p>
+            <p>
+                As the number of data points was very high we started of only including the data points from the five most recent years. With a higher 
+                number of datapoints the page gets extremely slow and that actually takes away the interest for exploring the data. To be able to include 
+                all of the data we redid the map where we didn’t immediately plot all of the incidents but instead we made heat signature points, 
+                and then we only plotted all the individual incidents when the reader clicks on a district. </br></br>
+
+                For the Fire Violations we divided them into a smaller number of categories as there were a lot of different descriptions. </br></br>
+
+                For the Fire Incidents we chose to only include the data points for which the incident type actually was a real fire. A lot of the 
+                incidents were because of something blocking a fire route or a sprinkler system which was malfunctioning. It could also be cleanup from 
+                an accident or something similar. We chose to only focus on actual fires as this was what we were interested in exploring. </br></br>
+
+                We have deleted a lot of columns which we don’t use in our plots. That is things like call number, batallion, Station Area and a lot of 
+                other data columns which we didn’t really need. We also removed all columns which didn’t have a value in one of the fields we wanted to 
+                use. 
+            </p>
             
-            <p>Write a short section that discusses the dataset stats, containing key points/plots from your exploratory data analysis.</p>
+            <p class="Q">Write a short section that discusses the dataset stats, containing key points/plots from your exploratory data analysis.</p>
+            <p>
+                Stats:
+                <ul>
+                    <li>
+                        Fire incidents:
+                        <ul>
+                            <li>
+                                Size: 160 MB
+                            </li>
+                            <li>
+                                Rows: 462 K
+                            </li>
+                            <li>
+                                Columns: 63
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                            Fire violations:
+                            <ul>
+                                <li>
+                                    Size: 4 MB
+                                </li>
+                                <li>
+                                    Rows: 18.1 K
+                                </li>
+                                <li>
+                                    Columns: 19
+                                </li>
+                            </ul>
+                        </li>
+                </ul>
+
+                Just by looking at the number of rows for the two datasets we can see that the number of fire incidents is a lot higher than 
+                the number of fire violations. However this is for a large part also because the fire incidents cover multiple kinds of 
+                incidents - many of which we probably wouldn’t categorize as actual incidents, as this dataset covers everything that has been 
+                reported(fire alarms not working or similar). That explains to some degree why there is such a difference in the size of these 
+                two datasets. This discovery(the broadness of the incident categories) led the decision of narrowing the data down in order to 
+                only showcase the actual fires and not false alarms, trash cans blocking exists etc. </br>
+                We also made some histograms of when the incidents and violations happened and found some very unexpected spikes every fifth 
+                year, and also from mid 2016, which we thought would be interesting to plot, and to explore further as part of our data story.    
+            </p>
         
         <h2>Genre. Which genre of data story did you use?</h2>
-            <p>Which tools did you use from each of the 3 categories of Visual Narrative (Figure 7 in Segal and Heer). Why?</p>
+            <p class="Q">Which tools did you use from each of the 3 categories of Visual Narrative (Figure 7 in Segal and Heer). Why?</p>
+            <p>
+                Establishing shot: We have chosen to present the reader with an establishing shot consisting of a large map of San Francisco 
+                with color codes for the number of fire violations and fire incidents because this is one of the main things of our story. 
+                We want to encourage the reader to dive more into the data by presenting an appealing and interesting visualization which captures 
+                one of the main themes of our data story.  </br></br>
+
+                Consistent visual platform: We have chosen to use the same fonts and the same font sizes for similar objects, and to make the three 
+                barcharts the same size because this consistency in style makes it easier to read through and because it’s way more visually appealing
+                to have a consistent visual platform. </br></br>
+
+                Timebar: We have included a timebar below our line graph which is used because it gives a good understanding of the period in 
+                which the data has been collected. And because the timeline is interactive the reader can in an easy and intuitive way get a feel 
+                for the development in the data through time. </br></br>
+
+                Close-ups: This is used in the map, to let the reader explore a specific district in depth. When the district is clicked the reader 
+                can see exactly where the violations and incidents has happened which can give a more detailed understanding of the data. </br></br>
+
+                Feature distinction: To distinguish between the two types, fire incidents and fire violations, we have used different colors, 
+                as this is the easiest and fastest way for humans to decode information. So we have given the features different colors to make 
+                the distinction effortless for the reader.  </br></br>
+
+                Zooming: Closely related to the close-ups this was chosen because we want the reader to see details-on-demand, and this is done 
+                through letting the reader zoom in on districts on the map.    </br></br>
+            </p>
             
-            <p>Which tools did you use from each of the 3 categories of Narrative Structure (Figure 7 in Segal and Heer). Why?</p>
+            <p class="Q">Which tools did you use from each of the 3 categories of Narrative Structure (Figure 7 in Segal and Heer). Why?</p>
+            <p>
+                Ordering: The ordering was chosen to be somewhat linear, and somewhat user directed. We have a pretty clear storyline, which follows 
+                from scrolling down the page and reading through the text. However it was not the intention to limit the reader to only explore the 
+                visualizations in this linear order, so the idea was also that the reader could return to the map and the barcharts again, after 
+                exploring the line chart with the timeline. </br></br>
+
+                Hover highlighting / details: Displaying details when hovering follows straight into the pattern of details-on-demand and was chosen 
+                to let the reader decide whether they want more information or not. Upon hovering, the reader is presented with exact numbers and not 
+                just colors, and also with a more detailed description of which type it is, or the name of the district.   </br></br>
+
+                Filtering/selection/search: When the reader has zoomed in on a district they can use a brush to select a certain area inside that district, 
+                and that is then updated in the barcharts besides the map. This way the reader can see how the data changes for a very specific area and 
+                themselves control which area they want to explore. This could be interesting if somebody lives in a certain area, want to go on holiday 
+                and stay at a hotel in a specific part of San Francisco or something similar so that is why we have chosen it.
+                The timeline also has a selection feature which is chosen because we want the reader to be able to see what happened in a 
+                specific month. So both of the selection features are included because it allows the user to choose very specific data points 
+                and because it’s a way of allowing the reader to explore the data more in depth. </br></br>
+                
+                Navigations buttons: We have a single button, which is for resetting the map. This was primarily chosen because it was the 
+                easiest way to allow the reader to zoom out again from the map. </br></br>
+
+                Captions/Headlines and introductory text: These tools were all used because it’s a convenient way of informing the reader about 
+                what he is going to read about. This way we could also provide the reader with some information, which could not be included in 
+                the visualizations, and makes it way easier to understand the visualizations. The short introductory text functions as kind of 
+                the background story for the data, but also as a way of capturing the attention of the reader and a way to make the reader want 
+                to explore this dataset and read on through the data story.     </br></br>
+            </p>
         
         <h2>Visualizations</h2>
-            <p>Explain the visualizations you’ve chosen.</p>
+            <p class="Q">Explain the visualizations you’ve chosen.</p>
+            <p>
+                    The first one is a map of San Francisco with circles for each district indicating how many incidents of fire, and the number of 
+                    violations in that district by using color scales.</br>
+                    Next to the map are three bar charts:
+                    <ul>
+                        <li>
+                            The top one shows the number of fire incidents by the hour the Fire Department was called for this incident. Hovering over 
+                            the bars shows the number of incidents at that hour.
+                        </li>
+                        <li>
+                            The middle shows the fire incidents’ type and the number of times the type has occurred. Hovering over the bars shows the number 
+                            of incidents in that type as well a description of the type.
+                        </li>
+                        <li>
+                            The last one shows the type of violation in the chart and the number of the type. Hovering over the bars shows a description of 
+                            the type of violation.
+                        </li>
+                    </ul>
+                    The reader is also able to click a district of interest and see the individual fire incidents and violations in that district. 
+                    When clicking the district the three bar charts on the side updates to reflect the data in that district.
+                    Once inside the district the reader can hover over each incident/violation to get more detailed information.</br></br>
+                    
+                    The second visualization is a line chart presenting all incidents and violations over time. The user is then able to use a brush 
+                    underneath the chart to zoom into smaller intervals of time.
+                    
+            </p>
             
-            <p>Why are they right for the story you want to tell?</p>
+            <p class="Q">Why are they right for the story you want to tell?</p>
+            <p>
+                    We think the map is good way to convey our story to the reader by allowing them to explore most of the data themselves 
+                    whilst guiding a little.</br>
+                    By using the color codes to indicate which districts has the most incidents and violations the reader gets an immediate 
+                    overview over the data. Then the reader can choose the district of their interest and start exploring that district.</br>
+                    The three barcharts are kind of an extension to the map and they reveal information which can not be communicated 
+                    to the reader through the map. </br>
+                    We think that the timeline chart is very useful for the reader in order to get an idea of the trends in the incidents and violations over time, which is much harder, if not impossible, to get from the map.
+                    Using the timeline chart we can show the reader interesting patterns, like holiday seasons resulting in more fire incidents or the fact that violations spike every 5 years due to regulations by the state of California.
+            </p>
         
         <h2>Discussion. Think critically about your creation</h2>
-            <p>What went well?,</p>
+            <p class="Q">What went well?,</p>
+            <p>
+                We found a good way to present the vast amount of data without making the user experience horrible for the user. Simply plotting 
+                every single incident and violation on the map would cause everything to slow down significantly.</br>
+                The map turned out well, giving the reader a nice overview of all the data and letting them explore more on their own.</br>
+                The line chart shows some interesting patterns and we found it to be a good way of revealing historical patterns to the reader.
+            </p>
             
-            <p>What is still missing? What could be improved?, Why?</p>
+            <p class="Q">What is still missing? What could be improved?, Why?</p>
+            <p>
+                Population data to present data per capita, which would give a clearer picture. We weren’t able to find any dataset 
+                related to district population.</br>
+                Restaurant data. A lot of the data is cooking fire, so it would be interesting to include the number of restaurant per 
+                district and see how it correlates with the number of cooking fires.</br>
+                Somehow split the outdoor fire type up into other smaller categories. The current type is number one in almost every 
+                district and we suspect that this broad category contains many different variations, which are sadly not described in our 
+                dataset.    
+            </p>
  
   </body>
 </html>
