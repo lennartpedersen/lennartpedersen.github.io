@@ -9,6 +9,11 @@
       <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 
       <style>
+        div {
+            background-color: white; 
+            opacity: 0;
+        }
+
         h1.title, h1.title-loader {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             font-size: 42px;
@@ -16,24 +21,24 @@
         }
 
         h1.pageTitle {
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font-family: Georgia, 'Times New Roman', Times, serif;
             font-size: 60px;
             text-align: center;
-            opacity: 0;
+
         }
 
         h1.sectionHeader {
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font-family: Georgia, 'Times New Roman', Times, serif;
             font-size: 36px;
             text-align: left;
-            opacity: 0;
+
             margin-left: 10%;
         }
 
         h2.refs {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             text-align: left;
-            opacity: 0;
+
             margin-left: 10%;
         }
 
@@ -60,7 +65,7 @@
         }
 
         div.container {
-            height: 1000px;
+            height: auto;
             width: 1250px;
 
             bottom: 0;
@@ -69,6 +74,7 @@
             right: 0;
 
             margin: auto;
+            padding: 20px;
         }
 
         div.mapDiv {
@@ -82,7 +88,7 @@
         }
 
         div.linechart {
-            height: 1500px;
+            height: auto;
             width: auto;
 
             bottom: 0;
@@ -98,6 +104,7 @@
             width: auto;
             
             margin: 25px;
+            padding: 20px;
         }
 
         div.imgcontainer {
@@ -131,7 +138,7 @@
 
         p {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            opacity: 0;
+
             margin-left: 10%;
             margin-right: 10%;
         }
@@ -147,28 +154,28 @@
   </head>
 
 
-  <body>
-      <p>
-      <a href="explainer.html" target="_blank">Explainer page</a>
-      <a href="https://github.com/TSandfeld/Viz_Final_Project" target="_blank">GitHub Repo</a>
-      <a href="Datasets.zip" download="Datasets.zip">Download datasets</a>
-    </p>
+  <body background="what-the-hex.png">
+      <div style="background-color: transparent">
+        <img style="width: 100%;" src="sanfran.jpg">
+        <p>
+        <a href="explainer.html" target="_blank">Explainer page</a>
+        <a href="https://github.com/TSandfeld/Viz_Final_Project" target="_blank">GitHub Repo</a>
+        <a href="Datasets.zip" download="Datasets.zip">Download datasets</a>
+        </p>
 
-      <h1 class="title-loader">
-            <i class="fa fa-refresh fa-spin" style="font-size:96px"></i>
-      </h1>
+    </div>
+        <h1 class="title-loader">
+                <i class="fa fa-refresh fa-spin" style="font-size:96px"></i>
+        </h1>
+
+
 
       
-          <img width="auto" src="sanfran.jpg" >
-
       
-      
+      <div class="container" >
           <h1 class="pageTitle">
-              San Francisco is on fire!
-            </h1>
-    
-
-      <div class="container">
+            San Francisco is on fire!
+          </h1>
           <p>
             The city of San Francisco is the home of a lot of fiery incidents! From 2005 to 2018 there has been 
             recorded more than 45,000 incidents of fire. Fires happen for a lot of different reasons - cooking fires,
@@ -187,7 +194,7 @@
             Explore the map and read on!
           </p>
           
-          <h1 class="title" style="opacity: 0;">
+          <h1 class="title">
               San Francisco City
           </h1>
           <p style="text-align: center; font-size: 12px; margin-top: -25px; color: darkgray">
@@ -195,19 +202,17 @@
             Click on a area to view the data in that district. 
           </p>
           <div class="mapDiv"></div>
-          <div class="chartDiv">
-          </div>
+          <div class="chartDiv"></div>
+          <p>
+              It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco. It would also seem
+              that a lot of the fires in these areas are related to cooking fires and outdoor fires. </br></br>
+              Actually out of the ~45,000 fires, roughly 30,000, or two thirds, are related to outdoor or cooking fires. The outdoor type may be too broad to interpret
+              in relation to which violations could lead to those types of fires – or if there even is a violation that could lead to such a fire. </br>
+              However it seems that there is a connection between cooking fires and outdoor fires - whenever one of the two is the most occurring fire type
+              the other one is typically the second most occuring.
+          </p>
 
           <div class="linechart">
-            <p>
-                It seems pretty clear that the majority of fires and violations happen in the northeastern parts of San Francisco. It would also seem
-                that a lot of the fires in these areas are related to cooking fires and outdoor fires. </br></br>
-                Actually out of the ~45,000 fires, roughly 30,000, or two thirds, are related to outdoor or cooking fires. The outdoor type may be too broad to interpret
-                in relation to which violations could lead to those types of fires – or if there even is a violation that could lead to such a fire. </br>
-                However it seems that there is a connection between cooking fires and outdoor fires - whenever one of the two is the most occurring fire type
-                the other one is typically the second most occuring.
-            </p>
-  
             <h1 class="sectionHeader">The history of fires in SF</h1>
             <p>
                 The end of the month of October is Halloween in the US and is celebrated across the country. During this holiday we can find 
@@ -280,9 +285,11 @@
         }
 
         function showTitleAndText() {
-            d3.selectAll("h1").style("opacity", 1);
-            d3.selectAll("h2").style("opacity", 1);
-            d3.selectAll("p").style("opacity", 1);
+            // d3.selectAll("h1").style("opacity", 1);
+            // d3.selectAll("h2").style("opacity", 1);
+            // d3.selectAll("p").style("opacity", 1);
+            // d3.selectAll("img").style("opacity", 1);
+            d3.selectAll("div").style("opacity", 1);
 
             d3.select("div.container")
                     .attr("height", h);
@@ -303,6 +310,7 @@
         d3.select("div.mapDiv")
             .append("p")
             .attr("class", "reset")
+            .style("background-color", "white")
             .text("Reset map")
             .on("click", function() {
                 resetMap();
@@ -547,7 +555,7 @@
                 })
                 .on("mouseout", function(e) {
                     d3.select(this)
-                        .style("fill", "transparent");
+                        .style("fill", "white");
 
                     div.transition()		
                         .duration(500)		
@@ -618,7 +626,7 @@
                     if (isBrushing) return "none";
                     if (!isBrushing) return "auto";
                 })
-                .style("fill", "transparent");
+                .style("fill", "white");
         }
 
         function resetMap() {
